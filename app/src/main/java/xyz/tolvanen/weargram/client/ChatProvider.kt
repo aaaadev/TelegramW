@@ -143,6 +143,15 @@ class ChatProvider @Inject constructor(private val client: TelegramClient) {
                     }
                     updateChats()
                 }
+                /*is TdApi.UpdateForumTopicInfo -> {
+                    if (!(_topicIds.value.contains(it.chatId))) {
+                        _topicIds.value.add(it.chatId)
+                        _topicData.value = _topicData.value.put(it.chatId, it.info)
+                    } else {
+                        _topicData.value = _topicData.value.remove(it.chatId)
+                        _topicData.value = _topicData.value.put(it.chatId, it.info)
+                    }
+                }*/
                 //is TdApi.UpdateChatFilters -> {}
                 //is TdApi.UpdateChatHasProtectedContent -> {}
                 //is TdApi.UpdateChatMember -> {}

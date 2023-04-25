@@ -1,6 +1,5 @@
-package xyz.tolvanen.weargram.ui.home
+package xyz.tolvanen.weargram.ui.topic
 
-import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.focusable
 import androidx.compose.foundation.gestures.animateScrollBy
@@ -16,7 +15,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.ColorPainter
 import androidx.compose.ui.input.rotary.onRotaryScrollEvent
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.style.TextOverflow
@@ -24,51 +22,34 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.wear.compose.material.*
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.launch
 import org.drinkless.tdlib.TdApi
-import org.drinkless.tdlib.TdApi.Chat
-import org.drinkless.tdlib.TdApi.ChatTypeBasicGroup
-import org.drinkless.tdlib.TdApi.ChatTypeSupergroup
-import xyz.tolvanen.weargram.R
+import org.drinkless.tdlib.TdApi.ForumTopics
 import xyz.tolvanen.weargram.Screen
-import xyz.tolvanen.weargram.ui.util.MessageStatusIcon
+import xyz.tolvanen.weargram.client.TopicProvider
+import xyz.tolvanen.weargram.ui.util.TopicMessageStatusIcon
 import java.text.DateFormat
 import java.text.SimpleDateFormat
 import java.util.*
 
 @Composable
-fun HomeScreen(navController: NavController, viewModel: HomeViewModel) {
-
-    val homeState by viewModel.homeState
-
-    when (homeState) {
-        HomeState.Loading -> {
-            Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                CircularProgressIndicator()
-            }
-        }
-        HomeState.Login -> {
-            navController.navigate(Screen.Login.route) {
-                launchSingleTop = true
-            }
-        }
-        HomeState.Ready -> {
-            HomeScaffold(navController, viewModel)
-        }
-    }
+fun TopicScreen(chatId: Long, navController: NavController, viewModel: TopicViewModel) {
+    TopicScaffold(chatId, navController, viewModel)
 }
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
-fun HomeScaffold(navController: NavController, viewModel: HomeViewModel) {
+fun TopicScaffold(chatId: Long, navController: NavController, viewModel: TopicViewModel) {
     val listState = rememberScalingLazyListState()
     val coroutineScope = rememberCoroutineScope()
     val focusRequester = remember { FocusRequester() }
-    val chats by viewModel.chatProvider.chatIds.collectAsState()
-    val chatData by viewModel.chatProvider.chatData.collectAsState()
-
-    Log.d("HomeScaffold", "chats: " + chats?.size.toString())
-    Log.d("HomeScaffold", "chatData: " + chatData.size.toString())
+    val topicsValue = viewModel.getTopics(chatId).collectAsState(initial = null)
+    topicsValue.value?.let {
+        val topicProvider = TopicProvider(viewModel.client, chatId, it)
+    val topics by topicProvider.threadIds.collectAsState()
+    val topicData by topicProvider.threadData.collectAsState()
 
     Scaffold(
         positionIndicator = {
@@ -93,44 +74,21 @@ fun HomeScaffold(navController: NavController, viewModel: HomeViewModel) {
                 .focusable()
                 .wrapContentHeight(),
         ) {
-
-            item {
-                CompactButton(
-                    onClick = { navController.navigate(Screen.MainMenu.route) },
-                    modifier = Modifier.padding(6.dp),
-                    colors = ButtonDefaults.buttonColors(backgroundColor = MaterialTheme.colors.surface)
-                ) {
-                    Icon(
-                        painterResource(id = R.drawable.baseline_menu_24),
-                        contentDescription = null,
-                    )
-
-                }
-            }
-            items(chats) { chatId ->
-                var topics = viewModel.getTopics(chatId).collectAsState(initial = null)
-                chatData[chatId]?.let { chat ->
+            items(topics) { topic ->
+                topicData[topic]?.let {
                     ChatItem(
-                        chat,
-                        onClick = {
-                            if (topics.value == null) {
-                                navController.navigate(Screen.Chat.buildRoute(chatId, -1))
-                            } else {
-                                navController.navigate(Screen.Topic.buildRoute(chatId))
-                            }
-                                  },
+                        it,
+                        onClick = { navController.navigate(Screen.Chat.buildRoute(chatId, it.info.messageThreadId)) },
                         viewModel
                     )
                 }
             }
         }
-
-        LaunchedEffect(Unit) {
-            focusRequester.requestFocus()
-        }
-
+    }
     }
 }
+
+
 
 @Composable
 fun ShortText(text: String, modifier: Modifier = Modifier, color: Color = Color(0xFF888888), user: String? = null) {
@@ -152,20 +110,14 @@ fun ShortText(text: String, modifier: Modifier = Modifier, color: Color = Color(
 }
 
 @Composable
-fun ShortDescription(message: TdApi.Message, chat: Chat, viewModel: HomeViewModel, modifier: Modifier = Modifier) {
+fun ShortDescription(message: TdApi.Message, topic: TdApi.ForumTopic, viewModel: TopicViewModel, modifier: Modifier = Modifier) {
     val altColor = Color(0xFF4588BE)
 
     val senderId = message.senderId
-    val chatType = chat.type
     val myId = remember(viewModel) { viewModel.client.me.value }
 
     val user = if ( senderId is TdApi.MessageSenderUser) {
-        if (senderId.userId == myId) {
-            if (chatType is TdApi.ChatTypePrivate && chatType.userId == myId) null
-            else "You"
-        } else if (chat.type is ChatTypeSupergroup || chat.type is ChatTypeBasicGroup) {
-            viewModel.client.getUser(senderId.userId)?.firstName
-        } else null
+        viewModel.client.getUser(senderId.userId)?.firstName
     } else null
 
     val username = if (senderId is TdApi.MessageSenderUser) {
@@ -232,7 +184,7 @@ fun ShortDescription(message: TdApi.Message, chat: Chat, viewModel: HomeViewMode
 }
 
 @Composable
-fun ChatItem(chat: TdApi.Chat, onClick: () -> Unit = {}, viewModel: HomeViewModel) {
+fun ChatItem(topic: TdApi.ForumTopic, onClick: () -> Unit = {}, viewModel: TopicViewModel) {
     Card(
         onClick = onClick,
         backgroundPainter = ColorPainter(MaterialTheme.colors.surface),
@@ -241,7 +193,7 @@ fun ChatItem(chat: TdApi.Chat, onClick: () -> Unit = {}, viewModel: HomeViewMode
         Row(horizontalArrangement = Arrangement.SpaceBetween) {
             // Chat name
             Text(
-                text = chat.title,
+                text = topic.info.name,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
                 style = MaterialTheme.typography.body1,
@@ -249,32 +201,32 @@ fun ChatItem(chat: TdApi.Chat, onClick: () -> Unit = {}, viewModel: HomeViewMode
             )
 
             // Time of last message
-            DateTime(chat.lastMessage)
+            DateTime(topic.lastMessage)
 
         }
         Row(horizontalArrangement = Arrangement.SpaceBetween) {
             // Last message content
-            chat.lastMessage?.also {
-                ShortDescription(it, chat, viewModel, modifier = Modifier.weight(1f))
+            topic.lastMessage?.also {
+                ShortDescription(it, topic, viewModel, modifier = Modifier.weight(1f))
             }
 
             // Status indicators
             Row(
                 modifier = Modifier.padding(start = 2.dp)
             ) {
-                chat.lastMessage?.also {message ->
-                    MessageStatusIcon(message, chat, modifier = Modifier
+                topic.lastMessage?.also {message ->
+                    TopicMessageStatusIcon(message, topic, modifier = Modifier
                         .size(20.dp)
                         .padding(top = 4.dp))
                 }
 
-                if (chat.unreadMentionCount > 0) {
+                if (topic.unreadMentionCount > 0) {
                     UnreadDot(text = "@", contentModifier = Modifier.padding(bottom = 2.dp))
                 }
 
-                if (chat.unreadCount - chat.unreadMentionCount > 0) {
+                if (topic.unreadCount - topic.unreadMentionCount > 0) {
                     UnreadDot(
-                        text = if (chat.unreadCount < 100) chat.unreadCount.toString() else "99+"
+                        text = if (topic.unreadCount < 100) topic.unreadCount.toString() else "99+"
                     )
                 }
             }
@@ -334,10 +286,4 @@ fun UnreadDot(
         )
     }
 
-}
-
-sealed class HomeState {
-    object Loading : HomeState()
-    object Login : HomeState()
-    object Ready : HomeState()
 }

@@ -43,8 +43,8 @@ class ChatViewModel @Inject constructor(
 
     private var startVisible = false
 
-    fun initialize(chatId: Long) {
-        messageProvider.initialize(chatId)
+    fun initialize(chatId: Long, threadId: Long) {
+        messageProvider.initialize(chatId, threadId)
         pullMessages()
 
         chatProvider.chatData.onEach {
@@ -58,8 +58,8 @@ class ChatViewModel @Inject constructor(
         messageProvider.pullMessages()
     }
 
-    fun sendMessageAsync(content: TdApi.InputMessageContent): Deferred<TdApi.Message> {
-        return messageProvider.sendMessageAsync(0, 0, TdApi.MessageSendOptions(), content)
+    fun sendMessageAsync(threadId: Long, content: TdApi.InputMessageContent): Deferred<TdApi.Message> {
+        return messageProvider.sendMessageAsync(threadId, 0, TdApi.MessageSendOptions(), content)
     }
 
     fun getUser(id: Long?): TdApi.User? = id?.let { client.getUser(it) }

@@ -1,4 +1,4 @@
-package xyz.tolvanen.weargram.ui
+ package xyz.tolvanen.weargram.ui
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.Devices
@@ -20,6 +20,7 @@ import xyz.tolvanen.weargram.ui.home.HomeScreen
 import xyz.tolvanen.weargram.ui.info.InfoScreen
 import xyz.tolvanen.weargram.ui.login.LoginScreen
 import xyz.tolvanen.weargram.ui.message.MessageMenuScreen
+import xyz.tolvanen.weargram.ui.topic.TopicScreen
 import xyz.tolvanen.weargram.ui.util.MapScreen
 import xyz.tolvanen.weargram.ui.util.MapView
 import xyz.tolvanen.weargram.ui.util.VideoView
@@ -55,11 +56,14 @@ private fun MainNavHost(navController: NavHostController) {
 
         composable(Screen.Chat.route) {
             Screen.Chat.getChatId(it)?.also { chatId ->
-                ChatScreen(
-                    navController = navController,
-                    chatId = chatId,
-                    viewModel = hiltViewModel(it)
-                )
+                Screen.Chat.getThreadId(it)?.also { threadId ->
+                    ChatScreen(
+                        navController = navController,
+                        chatId = chatId,
+                        threadId = threadId,
+                        viewModel = hiltViewModel(it)
+                    )
+                }
             }
         }
 
@@ -107,6 +111,12 @@ private fun MainNavHost(navController: NavHostController) {
         composable(Screen.Map.route) {
             val coordinates = Screen.Map.getCoordinates(it)
             MapScreen(coordinates.first, coordinates.second)
+        }
+
+        composable(Screen.Topic.route) {
+            Screen.Topic.getChatId(it)?.also { chat ->
+                TopicScreen(chatId = chat, navController = navController, viewModel = hiltViewModel(it))
+            }
         }
     }
 }

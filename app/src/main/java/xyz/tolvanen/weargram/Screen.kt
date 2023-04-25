@@ -11,10 +11,20 @@ sealed class Screen(val route: String) {
     object MainMenu : Screen("mainMenu")
     object Login : Screen("login")
 
-    object Chat : Screen("chat/{chatId}") {
-        fun buildRoute(chatId: Long): String = "chat/${chatId}"
+    object Topic : Screen("topic/{chatId}") {
+        fun buildRoute(chatId: Long): String = "topic/${chatId}"
+
         fun getChatId(entry: NavBackStackEntry): Long? =
             entry.arguments?.getString("chatId")?.toLong()
+    }
+
+    object Chat : Screen("chat/{chatId}/{threadId}") {
+        fun buildRoute(chatId: Long, threadId: Long): String = "chat/${chatId}/${threadId}"
+        fun getChatId(entry: NavBackStackEntry): Long? =
+            entry.arguments?.getString("chatId")?.toLong()
+
+        fun getThreadId(entry: NavBackStackEntry): Long? =
+            entry.arguments?.getString("threadId")?.toLong()
     }
 
     object ChatMenu : Screen("chatMenu/{chatId}") {

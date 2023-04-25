@@ -32,3 +32,26 @@ fun MessageStatusIcon(message: TdApi.Message, chat: TdApi.Chat, modifier: Modifi
         }
     }
 }
+
+@Composable
+fun TopicMessageStatusIcon(message: TdApi.Message, chat: TdApi.ForumTopic, modifier: Modifier = Modifier) {
+
+    if (message.isOutgoing) {
+        when (message.sendingState) {
+            is TdApi.MessageSendingStatePending -> {
+                Icon(imageVector = Icons.Outlined.Pending, contentDescription = null, modifier)
+            }
+            is TdApi.MessageSendingStateFailed -> {
+                Icon(imageVector = Icons.Outlined.SyncProblem, contentDescription = null, modifier)
+            }
+            else -> {
+                val lastReadId = chat.lastReadOutboxMessageId
+                if ((message.interactionInfo?.viewCount ?: 0) > 0 || lastReadId >= message.id) {
+                    Icon(imageVector = Icons.Outlined.DoneAll, contentDescription = null, modifier)
+                } else {
+                    Icon(imageVector = Icons.Outlined.Done, contentDescription = null, modifier)
+                }
+            }
+        }
+    }
+}
