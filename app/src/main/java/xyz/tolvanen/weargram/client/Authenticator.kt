@@ -5,7 +5,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
-import org.drinkless.td.libcore.telegram.TdApi
+import org.drinkless.tdlib.TdApi
 import javax.inject.Inject
 
 class Authenticator @Inject constructor(private val client: TelegramClient) {
@@ -104,10 +104,6 @@ class Authenticator @Inject constructor(private val client: TelegramClient) {
                     "onResult: AuthorizationStateWaitTdlibParameters -> state = UNAUTHENTICATED"
                 )
                 _authorizationState.value = Authorization.UNAUTHORIZED
-            }
-            is TdApi.AuthorizationStateWaitEncryptionKey -> {
-                Log.d(TAG, "onResult: AuthorizationStateWaitEncryptionKey")
-                client.sendUnscopedRequest(TdApi.CheckDatabaseEncryptionKey())
             }
             is TdApi.AuthorizationStateWaitPhoneNumber -> {
                 Log.d(TAG, "onResult: AuthorizationStateWaitPhoneNumber -> state = WAIT_NUMBER")

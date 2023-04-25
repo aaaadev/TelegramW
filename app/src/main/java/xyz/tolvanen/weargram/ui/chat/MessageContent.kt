@@ -35,7 +35,7 @@ import androidx.core.content.ContextCompat
 import androidx.core.content.ContextCompat.startActivity
 import androidx.navigation.NavController
 import androidx.wear.compose.material.*
-import org.drinkless.td.libcore.telegram.TdApi
+import org.drinkless.tdlib.TdApi
 import org.osmdroid.util.GeoPoint
 import org.osmdroid.views.CustomZoomButtonsController
 import org.osmdroid.views.overlay.Marker
@@ -96,7 +96,6 @@ fun MessageContent(
         is TdApi.MessageChatJoinByLink -> {}
         is TdApi.MessageChatJoinByRequest -> {}
         is TdApi.MessageChatSetTheme -> {}
-        is TdApi.MessageChatSetTtl -> {}
         is TdApi.MessageChatUpgradeFrom -> {}
         is TdApi.MessageChatUpgradeTo -> {}
         is TdApi.MessageContactRegistered -> {}

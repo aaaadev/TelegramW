@@ -25,10 +25,10 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.wear.compose.material.*
 import kotlinx.coroutines.launch
-import org.drinkless.td.libcore.telegram.TdApi
-import org.drinkless.td.libcore.telegram.TdApi.Chat
-import org.drinkless.td.libcore.telegram.TdApi.ChatTypeBasicGroup
-import org.drinkless.td.libcore.telegram.TdApi.ChatTypeSupergroup
+import org.drinkless.tdlib.TdApi
+import org.drinkless.tdlib.TdApi.Chat
+import org.drinkless.tdlib.TdApi.ChatTypeBasicGroup
+import org.drinkless.tdlib.TdApi.ChatTypeSupergroup
 import xyz.tolvanen.weargram.R
 import xyz.tolvanen.weargram.Screen
 import xyz.tolvanen.weargram.ui.util.MessageStatusIcon
@@ -194,7 +194,6 @@ fun ShortDescription(message: TdApi.Message, chat: Chat, viewModel: HomeViewMode
         is TdApi.MessageChatJoinByLink -> ShortText("Member joined via an invite link", color = altColor)
         is TdApi.MessageChatJoinByRequest -> ShortText("Member joined by request", color = altColor)
         is TdApi.MessageChatSetTheme -> ShortText("Chat theme was set", color = altColor)
-        is TdApi.MessageChatSetTtl -> ShortText("Chat TTL was set", color = altColor)
         is TdApi.MessageChatUpgradeFrom -> ShortText("Supergroup was created from group", color = altColor)
         is TdApi.MessageChatUpgradeTo -> ShortText("Supergroup was created from group", color = altColor)
         is TdApi.MessageContactRegistered -> ShortText("$username joined Telegram", color = altColor)

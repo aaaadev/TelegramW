@@ -16,7 +16,7 @@ import androidx.wear.compose.material.Scaffold
 import androidx.wear.compose.material.ScalingLazyColumn
 import androidx.wear.compose.material.Vignette
 import androidx.wear.compose.material.VignettePosition
-import org.drinkless.td.libcore.telegram.TdApi
+import org.drinkless.tdlib.TdApi
 import xyz.tolvanen.weargram.ui.util.MenuItem
 import xyz.tolvanen.weargram.ui.util.YesNoDialog
 

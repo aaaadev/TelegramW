@@ -1,14 +1,12 @@
 package xyz.tolvanen.weargram.client
 
-import android.util.Log
 import kotlinx.collections.immutable.PersistentMap
 import kotlinx.collections.immutable.persistentHashMapOf
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
-import org.drinkless.td.libcore.telegram.TdApi
-import java.lang.Thread.State
+import org.drinkless.tdlib.TdApi
 import java.util.concurrent.locks.ReentrantLock
 import javax.inject.Inject
 import kotlin.concurrent.withLock

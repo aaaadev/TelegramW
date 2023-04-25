@@ -8,7 +8,7 @@ import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 
-import org.drinkless.td.libcore.telegram.TdApi
+import org.drinkless.tdlib.TdApi
 import xyz.tolvanen.weargram.client.Authenticator
 import xyz.tolvanen.weargram.client.ChatProvider
 import xyz.tolvanen.weargram.client.TelegramClient
@@ -19,8 +19,8 @@ import javax.inject.Singleton
 @InstallIn(SingletonComponent::class)
 object WeargramModule {
     @Provides
-    fun provideTdlibParameters(@ApplicationContext context: Context): TdApi.TdlibParameters {
-        return TdApi.TdlibParameters().apply {
+    fun provideTdlibParameters(@ApplicationContext context: Context): TdApi.SetTdlibParameters {
+        return TdApi.SetTdlibParameters().apply {
             // Obtain application identifier hash for Telegram API access at https://my.telegram.org
             apiId = context.resources.getInteger(R.integer.api_id)
             apiHash = context.getString(R.string.api_hash)
@@ -37,7 +37,7 @@ object WeargramModule {
 
     @Singleton
     @Provides
-    fun provideTelegramClient(parameters: TdApi.TdlibParameters) = TelegramClient(parameters)
+    fun provideTelegramClient(parameters: TdApi.SetTdlibParameters) = TelegramClient(parameters)
 
     @Singleton
     @Provides

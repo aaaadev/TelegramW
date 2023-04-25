@@ -33,7 +33,7 @@ import androidx.wear.input.RemoteInputIntentHelper
 import androidx.wear.input.wearableExtender
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
-import org.drinkless.td.libcore.telegram.TdApi
+import org.drinkless.tdlib.TdApi
 import xyz.tolvanen.weargram.R
 import xyz.tolvanen.weargram.Screen
 import java.text.SimpleDateFormat

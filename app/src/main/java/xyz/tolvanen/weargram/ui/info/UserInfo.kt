@@ -21,7 +21,7 @@ import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import androidx.navigation.NavController
 import androidx.wear.compose.material.*
-import org.drinkless.td.libcore.telegram.TdApi
+import org.drinkless.tdlib.TdApi
 import xyz.tolvanen.weargram.R
 import xyz.tolvanen.weargram.Screen
 import java.text.DateFormat
@@ -82,8 +82,8 @@ fun Name(user: TdApi.User) {
 
 @Composable
 fun Username(user: TdApi.User) {
-    if (user.username != "") {
-        Text("@${user.username}")
+    if (user.usernames != null) {
+        Text("@${user.usernames!!.activeUsernames[0]}")
     }
 }
 

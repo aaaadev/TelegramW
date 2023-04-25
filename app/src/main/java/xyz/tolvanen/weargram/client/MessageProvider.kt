@@ -1,10 +1,9 @@
 package xyz.tolvanen.weargram.client
 
-import android.util.Log
 import kotlinx.collections.immutable.*
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
-import org.drinkless.td.libcore.telegram.TdApi
+import org.drinkless.tdlib.TdApi
 import java.util.concurrent.atomic.AtomicLong
 import javax.inject.Inject
 
@@ -128,8 +127,8 @@ class MessageProvider @Inject constructor(
     fun updateSeenItems(items: List<Long>) {
         client.sendUnscopedRequest(TdApi.ViewMessages(
             chatId,
-            0,
             items.toLongArray(),
+            TdApi.MessageSourceChatList(),
             false))
     }
 }

@@ -17,8 +17,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
-import org.drinkless.td.libcore.telegram.TdApi
-import org.drinkless.td.libcore.telegram.TdApi.MessageSenderUser
+import org.drinkless.tdlib.TdApi
+import org.drinkless.tdlib.TdApi.MessageSenderUser
 import xyz.tolvanen.weargram.MainActivity
 import xyz.tolvanen.weargram.R
 import java.util.concurrent.ConcurrentHashMap

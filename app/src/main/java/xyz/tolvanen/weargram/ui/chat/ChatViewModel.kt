@@ -16,7 +16,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.flow.*
-import org.drinkless.td.libcore.telegram.TdApi
+import org.drinkless.tdlib.TdApi
 import xyz.tolvanen.weargram.client.ChatProvider
 import xyz.tolvanen.weargram.client.MessageProvider
 import xyz.tolvanen.weargram.client.TelegramClient

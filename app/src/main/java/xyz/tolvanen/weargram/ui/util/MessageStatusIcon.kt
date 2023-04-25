@@ -8,7 +8,7 @@ import androidx.compose.material.icons.outlined.SyncProblem
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.wear.compose.material.Icon
-import org.drinkless.td.libcore.telegram.TdApi
+import org.drinkless.tdlib.TdApi
 
 @Composable
 fun MessageStatusIcon(message: TdApi.Message, chat: TdApi.Chat, modifier: Modifier = Modifier) {

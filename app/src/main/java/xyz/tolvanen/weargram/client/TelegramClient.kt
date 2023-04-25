@@ -1,16 +1,15 @@
 package xyz.tolvanen.weargram.client
 
-import android.util.Log
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.*
-import org.drinkless.td.libcore.telegram.Client
-import org.drinkless.td.libcore.telegram.TdApi
+import org.drinkless.tdlib.Client
+import org.drinkless.tdlib.TdApi
 import java.util.concurrent.ConcurrentHashMap
 import javax.inject.Inject
 
 
-class TelegramClient @Inject constructor(private val parameters: TdApi.TdlibParameters) {
+class TelegramClient @Inject constructor(private val parameters: TdApi.SetTdlibParameters) {
 
     private val _updateFlow = MutableSharedFlow<TdApi.Update>()
     val updateFlow: SharedFlow<TdApi.Update> get() = _updateFlow
@@ -80,11 +79,11 @@ class TelegramClient @Inject constructor(private val parameters: TdApi.TdlibPara
     private val requestScope = CoroutineScope(Dispatchers.IO)
     private val defaultScope = CoroutineScope(Dispatchers.Default)
 
-    fun sendUnscopedRequest(request: TdApi.Function) {
+    fun <R: TdApi.Object> sendUnscopedRequest(request: TdApi.Function<R>) {
             client.send(request) {}
         }
 
-    fun sendRequest(request: TdApi.Function): Flow<TdApi.Object> =
+    fun <R: TdApi.Object> sendRequest(request: TdApi.Function<R>): Flow<TdApi.Object> =
         callbackFlow {
             requestScope.launch {
                 client.send(request) {
@@ -95,7 +94,7 @@ class TelegramClient @Inject constructor(private val parameters: TdApi.TdlibPara
         }
 
     fun start() {
-        requestScope.launch { client.send(TdApi.SetTdlibParameters(parameters)) {} }
+        requestScope.launch { client.send(parameters) {} }
     }
 
     fun reset() {

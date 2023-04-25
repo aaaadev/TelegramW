@@ -10,9 +10,8 @@ import android.os.Binder
 import android.os.IBinder
 import android.util.Log
 import androidx.core.app.NotificationCompat
-import androidx.core.graphics.BitmapCompat
 import dagger.hilt.android.AndroidEntryPoint
-import org.drinkless.td.libcore.telegram.TdApi
+import org.drinkless.tdlib.TdApi
 import xyz.tolvanen.weargram.client.NotificationProvider
 import xyz.tolvanen.weargram.client.TelegramClient
 import javax.inject.Inject
@@ -47,7 +46,7 @@ class NotificationService : Service() {
             val msgIds = intent.getLongArrayExtra("msgIds")
             Log.d(TAG, "trying to read ${msgIds?.size} messages from $chatId")
             if (chatId > 0) {
-                client.sendUnscopedRequest(TdApi.ViewMessages(chatId, 0, msgIds, true))
+                client.sendUnscopedRequest(TdApi.ViewMessages(chatId, msgIds, TdApi.MessageSourceChatList(), true))
             }
         }
 
