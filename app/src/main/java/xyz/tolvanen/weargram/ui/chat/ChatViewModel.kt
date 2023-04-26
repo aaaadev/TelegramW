@@ -4,6 +4,8 @@ import android.content.Context
 import android.graphics.BitmapFactory
 import android.media.AudioAttributes
 import android.media.MediaPlayer
+import android.util.Log
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asImageBitmap
@@ -20,6 +22,7 @@ import org.drinkless.tdlib.TdApi
 import xyz.tolvanen.weargram.client.ChatProvider
 import xyz.tolvanen.weargram.client.MessageProvider
 import xyz.tolvanen.weargram.client.TelegramClient
+import xyz.tolvanen.weargram.ui.home.HomeState
 import java.lang.Float.max
 import java.lang.Float.min
 import javax.inject.Inject
@@ -34,6 +37,8 @@ class ChatViewModel @Inject constructor(
     @ApplicationContext context: Context
 ) : ViewModel() {
 
+    val chatState = mutableStateOf<ChatState>(ChatState.Loading)
+
     private val TAG = this::class.simpleName
 
     private val screenWidth = context.resources.displayMetrics.widthPixels
@@ -42,6 +47,15 @@ class ChatViewModel @Inject constructor(
     val chatFlow: StateFlow<TdApi.Chat> get() = _chatFlow
 
     private var startVisible = false
+    init {
+        messageProvider.messageData.onEach {
+            if (it.size != 0) {
+                chatState.value = ChatState.Ready
+            } else {
+                chatState.value = ChatState.Loading
+            }
+        }.launchIn(viewModelScope)
+    }
 
     fun initialize(chatId: Long, threadId: Long?) {
         messageProvider.initialize(chatId, threadId)
@@ -147,3 +161,7 @@ class ChatViewModel @Inject constructor(
 
 }
 
+sealed class ChatState {
+    object Loading : ChatState()
+    object Ready : ChatState()
+}

@@ -38,18 +38,29 @@ import kotlinx.coroutines.launch
 import org.drinkless.tdlib.TdApi
 import xyz.tolvanen.weargram.R
 import xyz.tolvanen.weargram.Screen
+import xyz.tolvanen.weargram.ui.home.HomeState
 import java.text.SimpleDateFormat
 import java.util.*
 
 @Composable
 fun ChatScreen(navController: NavController, chatId: Long, threadId: Long?, viewModel: ChatViewModel) {
+    val chatState by viewModel.chatState
     LaunchedEffect(chatId) { viewModel.initialize(chatId, threadId) }
-    DisposableEffect(viewModel) {
-        viewModel.onStart(chatId)
-        onDispose { viewModel.onStop(chatId) }
-    }
+    when (chatState) {
+        ChatState.Loading -> {
+            Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                CircularProgressIndicator()
+            }
+        }
+        ChatState.Ready -> {
+            DisposableEffect(viewModel) {
+                viewModel.onStart(chatId)
+                onDispose { viewModel.onStop(chatId) }
+            }
 
-    ChatScaffold(navController, chatId, threadId, viewModel)
+            ChatScaffold(navController, chatId, threadId, viewModel)
+        }
+    }
 }
 
 @OptIn(ExperimentalComposeUiApi::class)

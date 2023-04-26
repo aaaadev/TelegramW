@@ -123,6 +123,7 @@ class TelegramClient @Inject constructor(private val parameters: TdApi.SetTdlibP
 
     }
 
+    fun getMe(): TdApi.User? = _me.value?.let { getUser(it) }
     fun getUser(id: Long): TdApi.User? = users[id]
     fun getBasicGroup(id: Long): TdApi.BasicGroup? = basicGroups[id]
     fun getSupergroup(id: Long): TdApi.Supergroup? = supergroups[id]

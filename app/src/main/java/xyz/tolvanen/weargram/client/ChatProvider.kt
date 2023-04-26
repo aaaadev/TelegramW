@@ -201,7 +201,9 @@ class ChatProvider @Inject constructor(private val client: TelegramClient) {
     private fun updateChats() {
         chatOrderingLock.withLock {
             _chatIds.value = chatOrdering.toList().map {
-                syncThread(it.first)
+                if (!_threadData.value.contains(it.first)) {
+                    syncThread(it.first)
+                }
                 it.first
             }
         }
