@@ -1,5 +1,6 @@
 package xyz.tolvanen.weargram.client
 
+import android.util.Log
 import kotlinx.collections.immutable.*
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
@@ -15,7 +16,7 @@ class MessageProvider @Inject constructor(
     private val TAG = this::class.simpleName
 
     private var chatId: Long = -1
-    private var threadId: Long = -1
+    private var threadId: Long? = null
 
     private val oldestMessageId = AtomicLong(0)
     private val lastQueriedMessageId = AtomicLong(-1)
@@ -28,16 +29,31 @@ class MessageProvider @Inject constructor(
 
     private val scope = CoroutineScope(Dispatchers.Default)
 
-    fun initialize(chatId: Long, threadId: Long) {
+    fun initialize(chatId: Long, threadId: Long?) {
         this.chatId = chatId
         this.threadId = threadId
 
+        Log.d("MessageProvider", "threadId: " + this.threadId.toString())
+
         client.updateFlow
             .filterIsInstance<TdApi.UpdateNewMessage>()
-            .filter { it.message.chatId == chatId && (it.message.messageThreadId == threadId || threadId == -1L) }
+            .filter { it.message.chatId == chatId && (threadId == null || threadId == it.message.messageThreadId) }
             .onEach {
                 _messageData.value = _messageData.value.put(it.message.id, it.message)
                 _messageIds.value = _messageIds.value.add(0, it.message.id)
+            }.launchIn(scope)
+
+        client.updateFlow
+            .filterIsInstance<TdApi.UpdateMessageSendSucceeded>()
+            .filter { it.message.chatId == chatId && (threadId == null || threadId == it.message.messageThreadId) }
+            .onEach {
+                if (_messageData.value.contains(it.oldMessageId)) {
+                    _messageIds.value = _messageIds.value.mutate { list ->
+                        list[_messageIds.value.indexOf(it.oldMessageId)] = it.message.id
+                    }
+                    _messageData.value = _messageData.value.remove(it.oldMessageId)
+                }
+                _messageData.value = _messageData.value.put(it.message.id, it.message)
             }.launchIn(scope)
 
         client.updateFlow
@@ -45,48 +61,36 @@ class MessageProvider @Inject constructor(
             .filter { it.chatId == chatId }
             .filter { it.isPermanent }
             .onEach {
-                var deleteIds = mutableListOf<Long>()
+                var removeList = mutableListOf<Long>()
                 it.messageIds.forEach { id ->
                     if (_messageData.value.contains(id)) {
-                        deleteIds.add(id)
                         _messageData.value = _messageData.value.remove(id)
+                        removeList.add(id)
                     }
                 }
-                _messageIds.value.removeAll(deleteIds.toList())
+                _messageIds.value = _messageIds.value.removeAll(removeList.toList())
             }.launchIn(scope)
 
         client.updateFlow
             .filterIsInstance<TdApi.UpdateMessageContent>()
             .filter { it.chatId == chatId }
             .onEach {
-                if (_messageData.value.contains(it.messageId)) {
                     _messageData.value[it.messageId]?.also { msg ->
-                        msg.content = it.newContent
-                        _messageData.value = _messageData.value.remove(it.messageId)
-                        _messageData.value = _messageData.value.put(it.messageId, msg)
+                        if (_messageData.value.contains(it.messageId)) {
+                            msg.content = it.newContent
+                            _messageData.value = _messageData.value.remove(it.messageId)
+                            _messageData.value = _messageData.value.put(it.messageId, msg)
+                        }
                     }
-                }
             }.launchIn(scope)
-
-        client.updateFlow
-            .filterIsInstance<TdApi.UpdateMessageSendSucceeded>()
-            .filter { it.message.chatId == chatId && (it.message.messageThreadId == threadId || threadId == -1L) }
-            .onEach {
-                _messageIds.value = _messageIds.value.mutate { list ->
-                    list[_messageIds.value.indexOf(it.oldMessageId)] = it.message.id
-                }
-                _messageData.value = _messageData.value.put(it.message.id, it.message)
-                _messageData.value = _messageData.value.remove(it.oldMessageId)
-            }.launchIn(scope)
-
     }
 
-    fun pullMessages() {
+    fun pullMessages(limit: Int = 10) {
         if (lastQueriedMessageId.get() != oldestMessageId.get()) {
             val msgId = oldestMessageId.get()
             lastQueriedMessageId.set(msgId)
 
-            val messageSource = getMessages(msgId, limit = 10)
+            val messageSource = getMessages(msgId, limit)
             scope.launch {
                 messageSource.collect { messages ->
                     _messageData.value = _messageData.value.putAll(messages.associateBy { message -> message.id })
@@ -104,9 +108,23 @@ class MessageProvider @Inject constructor(
     }
 
     private fun getMessages(fromMessageId: Long, limit: Int): Flow<List<TdApi.Message>> =
-        client.sendRequest(TdApi.GetChatHistory(chatId, fromMessageId, 0, limit, false))
-            .filterIsInstance<TdApi.Messages>()
-            .map { it.messages.toList() }
+        if (threadId != null) {
+            client.sendRequest(
+                TdApi.GetMessageThreadHistory(
+                    chatId,
+                    threadId!!,
+                    fromMessageId,
+                    0,
+                    limit
+                )
+            )
+                .filterIsInstance<TdApi.Messages>()
+                .map { it.messages.toList() }
+        } else {
+            client.sendRequest(TdApi.GetChatHistory(chatId, fromMessageId, 0, limit, false))
+                .filterIsInstance<TdApi.Messages>()
+                .map { it.messages.toList() }
+        }
 
 
     fun sendMessageAsync(

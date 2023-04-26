@@ -28,7 +28,7 @@ import kotlin.math.sign
 
 @HiltViewModel
 class ChatViewModel @Inject constructor(
-    private val client: TelegramClient,
+    val client: TelegramClient,
     private val chatProvider: ChatProvider,
     val messageProvider: MessageProvider,
     @ApplicationContext context: Context
@@ -43,7 +43,7 @@ class ChatViewModel @Inject constructor(
 
     private var startVisible = false
 
-    fun initialize(chatId: Long, threadId: Long) {
+    fun initialize(chatId: Long, threadId: Long?) {
         messageProvider.initialize(chatId, threadId)
         pullMessages()
 

@@ -31,7 +31,9 @@ import androidx.navigation.NavController
 import androidx.wear.compose.material.*
 import androidx.wear.input.RemoteInputIntentHelper
 import androidx.wear.input.wearableExtender
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.launch
 import org.drinkless.tdlib.TdApi
 import xyz.tolvanen.weargram.R
@@ -40,10 +42,7 @@ import java.text.SimpleDateFormat
 import java.util.*
 
 @Composable
-fun ChatScreen(navController: NavController, chatId: Long, threadId: Long, viewModel: ChatViewModel) {
-
-    Log.d("ChatScreen", "recomp")
-    Log.d("ChatScreen", "yay")
+fun ChatScreen(navController: NavController, chatId: Long, threadId: Long?, viewModel: ChatViewModel) {
     LaunchedEffect(chatId) { viewModel.initialize(chatId, threadId) }
     DisposableEffect(viewModel) {
         viewModel.onStart(chatId)
@@ -55,7 +54,7 @@ fun ChatScreen(navController: NavController, chatId: Long, threadId: Long, viewM
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
-fun ChatScaffold(navController: NavController, chatId: Long, threadId: Long, viewModel: ChatViewModel) {
+fun ChatScaffold(navController: NavController, chatId: Long, threadId: Long?, viewModel: ChatViewModel) {
 
     val messageIds by viewModel.messageProvider.messageIds.collectAsState()
     val messages by viewModel.messageProvider.messageData.collectAsState()
@@ -104,7 +103,7 @@ fun ChatScaffold(navController: NavController, chatId: Long, threadId: Long, vie
                     MessageInput(navController = navController, chatId = chatId, sendMessage = {
                         scope.launch {
                             viewModel.sendMessageAsync(
-                                threadId = if (threadId == -1L) { 0 } else { threadId },
+                                threadId = threadId ?: 0,
                                 content = TdApi.InputMessageText(
                                     TdApi.FormattedText(
                                         it, emptyArray()
@@ -118,24 +117,21 @@ fun ChatScaffold(navController: NavController, chatId: Long, threadId: Long, vie
                     messageIds.zip(messageIds.drop(1) + listOf(null)),
                     key = { it }) { (id, prevId) ->
                     messages[id]?.also { message ->
-                        Log.d("Chat", "asdf: " + message.messageThreadId.toString() + " t: " + threadId.toString())
-                        if (message.messageThreadId == threadId || threadId == -1L) {
-                            val displayDate = messages[prevId]?.let { prevMessage ->
-                                val prevDate = Calendar.getInstance()
-                                    .apply { time = Date(prevMessage.date.toLong() * 1000) }
-                                val thisDate = Calendar.getInstance()
-                                    .apply { time = Date(message.date.toLong() * 1000) }
-                                thisDate.get(Calendar.DAY_OF_YEAR) != prevDate.get(Calendar.DAY_OF_YEAR)
-                            } ?: true
+                        val displayDate = messages[prevId]?.let { prevMessage ->
+                            val prevDate = Calendar.getInstance()
+                                .apply { time = Date(prevMessage.date.toLong() * 1000) }
+                            val thisDate = Calendar.getInstance()
+                                .apply { time = Date(message.date.toLong() * 1000) }
+                            thisDate.get(Calendar.DAY_OF_YEAR) != prevDate.get(Calendar.DAY_OF_YEAR)
+                        } ?: true
 
-                            MessageItem(
-                                message,
-                                messages[prevId],
-                                viewModel,
-                                navController,
-                                displayDate = displayDate
-                            )
-                        }
+                        MessageItem(
+                            message,
+                            messages[prevId],
+                            viewModel,
+                            navController,
+                            displayDate = displayDate
+                        )
                     }
                 }
 

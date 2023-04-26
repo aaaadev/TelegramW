@@ -57,12 +57,16 @@ private fun MainNavHost(navController: NavHostController) {
         composable(Screen.Chat.route) {
             Screen.Chat.getChatId(it)?.also { chatId ->
                 Screen.Chat.getThreadId(it)?.also { threadId ->
-                    ChatScreen(
-                        navController = navController,
-                        chatId = chatId,
-                        threadId = threadId,
-                        viewModel = hiltViewModel(it)
-                    )
+                        ChatScreen(
+                            navController = navController,
+                            chatId = chatId,
+                            threadId = if (threadId == Long.MAX_VALUE) {
+                                null
+                            } else {
+                                threadId
+                            },
+                            viewModel = hiltViewModel(it)
+                        )
                 }
             }
         }

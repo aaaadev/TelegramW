@@ -45,8 +45,8 @@ fun TopicScaffold(chatId: Long, navController: NavController, viewModel: TopicVi
     val listState = rememberScalingLazyListState()
     val coroutineScope = rememberCoroutineScope()
     val focusRequester = remember { FocusRequester() }
-    val topicsValue = viewModel.getTopics(chatId).collectAsState(initial = null)
-    topicsValue.value?.let {
+    val topicsValue = viewModel.getTopics(chatId)
+    topicsValue?.let {
         val topicProvider = TopicProvider(viewModel.client, chatId, it)
     val topics by topicProvider.threadIds.collectAsState()
     val topicData by topicProvider.threadData.collectAsState()
@@ -76,11 +76,37 @@ fun TopicScaffold(chatId: Long, navController: NavController, viewModel: TopicVi
         ) {
             items(topics) { topic ->
                 topicData[topic]?.let {
-                    ChatItem(
-                        it,
-                        onClick = { navController.navigate(Screen.Chat.buildRoute(chatId, it.info.messageThreadId)) },
-                        viewModel
+                    val info = viewModel.getTopicInfo(chatId, it.lastMessage!!.id).collectAsState(
+                        initial = null
                     )
+                    if (info.value == null) {
+                        ChatItem(
+                            it,
+                            onClick = {
+                                navController.navigate(
+                                    Screen.Chat.buildRoute(
+                                        chatId,
+                                        it.info.messageThreadId
+                                    )
+                                )
+                            },
+                            viewModel
+                        )
+                    } else {
+                        ChatItem(
+                            it,
+                            onClick = {
+                                navController.navigate(
+                                        Screen.Chat.buildRoute(
+                                            chatId,
+                                            info.value!!.messageThreadId
+                                        )
+
+                                )
+                            },
+                            viewModel
+                        )
+                    }
                 }
             }
         }

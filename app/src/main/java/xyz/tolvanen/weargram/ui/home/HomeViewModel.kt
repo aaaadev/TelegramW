@@ -42,9 +42,5 @@ class HomeViewModel @Inject constructor(
             }
         }.launchIn(viewModelScope)
     }
-
-    fun getTopics(chatId: Long): Flow<TdApi.ForumTopics> {
-        return client.sendRequest(TdApi.GetForumTopics(chatId, "", 0, 0, 0, Int.MAX_VALUE)).filterIsInstance()
-    }
 }
 

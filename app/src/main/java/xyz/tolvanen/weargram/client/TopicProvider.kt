@@ -48,7 +48,7 @@ class TopicProvider @Inject constructor(private val client: TelegramClient, priv
 
         client.updateFlow.onEach {
             when(it) {
-                is TdApi.UpdateChatLastMessage -> {
+                /*is TdApi.UpdateChatLastMessage -> {
                     if (chatId == it.chatId) {
                         it.lastMessage?.let { it1 ->
                             updateProperty(it1.messageThreadId) { topic ->
@@ -57,7 +57,7 @@ class TopicProvider @Inject constructor(private val client: TelegramClient, priv
                         }
                         updateTopicPositions(it.chatId, it.positions)
                     }
-                }
+                }*/
                 is TdApi.UpdateForumTopicInfo -> {
                     if (chatId == it.chatId) {
                         updateProperty(it.info.messageThreadId) { topic ->

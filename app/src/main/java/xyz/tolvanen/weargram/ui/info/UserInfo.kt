@@ -161,7 +161,7 @@ fun SendMessage(user: TdApi.User, viewModel: InfoViewModel, navController: NavCo
             .padding(top = 5.dp),
         onClick = {
             chat.value?.also {
-                navController.navigate(Screen.Chat.buildRoute(it.id, -1)) {
+                navController.navigate(Screen.Chat.buildRoute(it.id, Long.MAX_VALUE)) {
                     popUpTo(Screen.Home.route)
                 }
             }

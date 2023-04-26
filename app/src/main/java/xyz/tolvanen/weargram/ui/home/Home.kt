@@ -24,11 +24,13 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.wear.compose.material.*
+import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.launch
 import org.drinkless.tdlib.TdApi
 import org.drinkless.tdlib.TdApi.Chat
 import org.drinkless.tdlib.TdApi.ChatTypeBasicGroup
 import org.drinkless.tdlib.TdApi.ChatTypeSupergroup
+import org.drinkless.tdlib.TdApi.ForumTopics
 import xyz.tolvanen.weargram.R
 import xyz.tolvanen.weargram.Screen
 import xyz.tolvanen.weargram.ui.util.MessageStatusIcon
@@ -66,6 +68,8 @@ fun HomeScaffold(navController: NavController, viewModel: HomeViewModel) {
     val focusRequester = remember { FocusRequester() }
     val chats by viewModel.chatProvider.chatIds.collectAsState()
     val chatData by viewModel.chatProvider.chatData.collectAsState()
+    val forums by viewModel.chatProvider.threads.collectAsState()
+    //val forumData by viewModel.chatProvider.threadData.collectAsState()
 
     Log.d("HomeScaffold", "chats: " + chats?.size.toString())
     Log.d("HomeScaffold", "chatData: " + chatData.size.toString())
@@ -108,13 +112,12 @@ fun HomeScaffold(navController: NavController, viewModel: HomeViewModel) {
                 }
             }
             items(chats) { chatId ->
-                var topics = viewModel.getTopics(chatId).collectAsState(initial = null)
                 chatData[chatId]?.let { chat ->
                     ChatItem(
                         chat,
                         onClick = {
-                            if (topics.value == null) {
-                                navController.navigate(Screen.Chat.buildRoute(chatId, -1))
+                            if (!forums.contains(chatId)) {
+                                navController.navigate(Screen.Chat.buildRoute(chatId, Long.MAX_VALUE))
                             } else {
                                 navController.navigate(Screen.Topic.buildRoute(chatId))
                             }

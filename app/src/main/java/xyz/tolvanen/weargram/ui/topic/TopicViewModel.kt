@@ -18,9 +18,13 @@ import org.drinkless.tdlib.TdApi.ForumTopics
 @HiltViewModel
 class TopicViewModel  @Inject constructor(
     val client: TelegramClient,
+    val chatProvider: ChatProvider,
 ) : ViewModel() {
-    fun getTopics(chatId: Long): Flow<ForumTopics> {
-        return client.sendRequest(TdApi.GetForumTopics(chatId, "", 0, 0, 0, Int.MAX_VALUE))
-            .filterIsInstance()
+    fun getTopics(chatId: Long): ForumTopics? {
+        return chatProvider.threadData.value[chatId]
+    }
+
+    fun getTopicInfo(chatId: Long, threadId: Long): Flow<TdApi.MessageThreadInfo> {
+        return client.sendRequest(TdApi.GetMessageThread(chatId, threadId)).filterIsInstance()
     }
 }

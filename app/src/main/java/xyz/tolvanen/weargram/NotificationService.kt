@@ -90,11 +90,6 @@ class NotificationService : Service() {
                 .setSmallIcon(R.drawable.ic_notification)
                 .setLargeIcon(BitmapFactory.decodeResource(resources, R.drawable.ic_launcher_foreground))
                 .setContentIntent(pendingIntent)
-                .addAction(
-                    R.drawable.baseline_play_arrow_24,
-                    "Open",
-                    PendingIntent.getActivity(applicationContext, 0, Intent(this, MainActivity::class.java), 0)
-                )
                 .build()
 
         startForeground(FOREGROUND_NOTIFICATION_ID, notification)

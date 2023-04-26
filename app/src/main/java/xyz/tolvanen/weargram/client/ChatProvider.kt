@@ -1,5 +1,7 @@
 package xyz.tolvanen.weargram.client
 
+import android.util.Log
+import androidx.compose.runtime.collectAsState
 import kotlinx.collections.immutable.PersistentMap
 import kotlinx.collections.immutable.persistentHashMapOf
 import kotlinx.coroutines.CoroutineScope
@@ -27,6 +29,13 @@ class ChatProvider @Inject constructor(private val client: TelegramClient) {
     private val _chatData = MutableStateFlow(persistentHashMapOf<Long, TdApi.Chat>())
     val chatData: StateFlow<PersistentMap<Long, TdApi.Chat>> get() = _chatData
 
+    private val _threads = MutableStateFlow(hashSetOf<Long>())
+    val threads: StateFlow<HashSet<Long>> get() = _threads
+
+    private val _threadData = MutableStateFlow(persistentHashMapOf<Long, TdApi.ForumTopics>())
+    val threadData: StateFlow<PersistentMap<Long, TdApi.ForumTopics>> get() = _threadData
+
+
     private val scope = CoroutineScope(Dispatchers.Default)
 
     private fun updateProperty(chatId: Long, update: (TdApi.Chat) -> TdApi.Chat) {
@@ -37,7 +46,6 @@ class ChatProvider @Inject constructor(private val client: TelegramClient) {
     }
 
     init {
-
         client.updateFlow.onEach {
             //Log.d(TAG, it.toString())
             when (it) {
@@ -168,6 +176,21 @@ class ChatProvider @Inject constructor(private val client: TelegramClient) {
         }.launchIn(scope)
     }
 
+    private fun syncThread(chatId: Long) {
+        scope.launch {
+            val topicsFlow: Flow<TdApi.ForumTopics> = client.sendRequest(TdApi.GetForumTopics(chatId, "", 0, 0, 0, Int.MAX_VALUE)).filterIsInstance()
+            topicsFlow.collect() { topics ->
+                if (topics.topics == null) {
+                    _threads.value.remove(chatId)
+                    _threadData.value.remove(chatId)
+                } else {
+                    _threads.value.add(chatId)
+                    _threadData.value = _threadData.value.put(chatId, topics)
+                }
+            }
+        }
+    }
+
     fun loadChats() {
         scope.launch {
             client.sendRequest(TdApi.LoadChats(TdApi.ChatListMain(), Int.MAX_VALUE))
@@ -176,10 +199,16 @@ class ChatProvider @Inject constructor(private val client: TelegramClient) {
     }
 
     private fun updateChats() {
-        chatOrderingLock.withLock { _chatIds.value = chatOrdering.toList().map { it.first } }
+        chatOrderingLock.withLock {
+            _chatIds.value = chatOrdering.toList().map {
+                syncThread(it.first)
+                it.first
+            }
+        }
     }
 
     private fun updateChatPositions(chatId: Long, positions: Array<TdApi.ChatPosition>) {
+        syncThread(chatId)
         chatOrderingLock.withLock {
             chatOrdering.removeIf { it.first == chatId }
             positions.dropWhile { it.list !is TdApi.ChatListMain }
