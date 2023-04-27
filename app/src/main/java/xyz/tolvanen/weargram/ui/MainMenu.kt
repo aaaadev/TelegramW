@@ -18,6 +18,7 @@ import xyz.tolvanen.weargram.Screen
 import xyz.tolvanen.weargram.client.Authenticator
 import xyz.tolvanen.weargram.client.TelegramClient
 import javax.inject.Inject
+import kotlin.system.exitProcess
 
 @HiltViewModel
 class MainMenuViewModel @Inject constructor(
@@ -71,6 +72,18 @@ fun ProfileChip(viewModel: MainMenuViewModel, navController: NavController) {
 }
 
 @Composable
+fun ExitChip(viewModel: MainMenuViewModel, navController: NavController) {
+    Chip(
+        modifier = Modifier.fillMaxWidth(0.9f),
+        onClick = {
+            exitProcess(0)
+        },
+        label = { Text("Exit") },
+        colors = ChipDefaults.chipColors(backgroundColor = MaterialTheme.colors.surface)
+    )
+}
+
+@Composable
 fun MainMenuScreen(navController: NavController, viewModel: MainMenuViewModel) {
 
     ScalingLazyColumn(
@@ -81,6 +94,7 @@ fun MainMenuScreen(navController: NavController, viewModel: MainMenuViewModel) {
     ) {
         item { LogoutChip(viewModel, navController) }
         item { ProfileChip(viewModel, navController) }
+        item { ExitChip(viewModel, navController) }
     }
 }
 

@@ -9,3 +9,5 @@
 .cxx
 local.properties
 /libtd/build
+/app/release
+/app/debug

@@ -12,10 +12,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.ClickableText
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -45,7 +42,7 @@ import xyz.tolvanen.weargram.ui.util.MapView
 import xyz.tolvanen.weargram.ui.util.MessageStatusIcon
 import xyz.tolvanen.weargram.ui.util.VideoView
 import java.text.DateFormat
-
+import xyz.tolvanen.weargram.ui.util.ShortDescription
 
 @Composable
 fun MessageContent(
@@ -90,7 +87,7 @@ fun MessageContent(
         is TdApi.MessageCall -> CallMessage(message, content, viewModel, modifier, onClick = onClick)
         is TdApi.MessagePoll -> PollMessage(message, content, viewModel, modifier, onClick = onClick)
         is TdApi.MessageContact -> ContactMessage(message, content, viewModel, modifier, onClick = onClick)
-        else -> UnsupportedMessage(message, modifier, onClick = onClick)
+        else -> UnsupportedMessage(message, viewModel, modifier, onClick = onClick)
     }
 }
 
@@ -98,6 +95,7 @@ fun MessageContent(
 fun MessageCard(
     message: TdApi.Message,
     modifier: Modifier = Modifier,
+    viewModel: ChatViewModel,
     contentPadding: PaddingValues = CardDefaults.ContentPadding,
     onClick: () -> Unit = {},
     content: @Composable (ColumnScope.() -> Unit),
@@ -108,7 +106,30 @@ fun MessageCard(
         backgroundPainter = ColorPainter(
             if (message.isOutgoing) MaterialTheme.colors.primaryVariant else MaterialTheme.colors.surface
         ),
-    ) { content() }
+    ) {
+        if (message.replyToMessageId != 0L) {
+            val messages by viewModel.messageProvider.messageData.collectAsState()
+            val chats by viewModel.chatProvider.chatData.collectAsState()
+            messages[message.replyToMessageId]?.also { reply ->
+                chats[message.chatId]?.also { chat ->
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth(0.85f)
+                            .padding(start = 3.dp, bottom = 7.dp)
+                            .clickable {  }
+                    ) {
+                            ShortDescription(
+                                message = reply,
+                                chat = chat,
+                                viewModel = viewModel,
+                                client = viewModel.client,
+                            )
+                    }
+                }
+            }
+        }
+        content()
+    }
 }
 
 @Composable
@@ -302,7 +323,7 @@ fun TextMessage(
     onClick: () -> Unit = {}
 ) {
 
-    MessageCard(message, onClick = onClick) {
+    MessageCard(message, onClick = onClick, viewModel = viewModel) {
 
         Column(
             horizontalAlignment = Alignment.Start
@@ -332,7 +353,7 @@ fun PhotoMessage(
     }
     val image = remember { viewModel.fetchPhoto(content) }.collectAsState(initial = null)
 
-    MessageCard(message, onClick = onClick, contentPadding = PaddingValues(0.dp)) {
+    MessageCard(message, onClick = onClick, contentPadding = PaddingValues(0.dp), viewModel = viewModel) {
         Column(modifier = Modifier.fillMaxSize(), verticalArrangement = Arrangement.Top) {
 
             image.value?.also { Image(bitmap = it, contentDescription = null) }
@@ -371,7 +392,7 @@ fun AudioMessage(
     val position = remember { mutableStateOf(0f) }
 
 
-    MessageCard(message, onClick = onClick) {
+    MessageCard(message, onClick = onClick, viewModel = viewModel) {
         Box(
             modifier = Modifier.fillMaxWidth(),
             contentAlignment = Alignment.Center
@@ -445,7 +466,7 @@ fun VoiceNoteMessage(
     val position = remember { mutableStateOf(0f) }
 
 
-    MessageCard(message, onClick = onClick) {
+    MessageCard(message, onClick = onClick, viewModel = viewModel) {
         Box(
             modifier = Modifier.fillMaxWidth(),
             contentAlignment = Alignment.Center
@@ -532,7 +553,7 @@ fun VideoMessage(
         }
     }
 
-    MessageCard(message, onClick = onClick, contentPadding = PaddingValues(0.dp)) {
+    MessageCard(message, onClick = onClick, contentPadding = PaddingValues(0.dp), viewModel = viewModel) {
         Column(
             modifier = Modifier.fillMaxSize(), verticalArrangement = Arrangement.Top
         ) {
@@ -617,7 +638,7 @@ fun VideoNoteMessage(
         }
     }
 
-    MessageCard(message, onClick = onClick, contentPadding = PaddingValues(0.dp)) {
+    MessageCard(message, onClick = onClick, contentPadding = PaddingValues(0.dp), viewModel = viewModel) {
         Column(
             modifier = Modifier.fillMaxSize(), verticalArrangement = Arrangement.Top
         ) {
@@ -689,7 +710,7 @@ fun StickerMessage(
             Column {
                 Image(bitmap = bitmap, contentDescription = null)
             }
-        } ?: MessageCard(message, onClick = onClick) {
+        } ?: MessageCard(message, onClick = onClick, viewModel = viewModel) {
             Text(content.sticker.emoji + " Sticker")
         }
     }
@@ -703,7 +724,7 @@ fun DocumentMessage(
     modifier: Modifier = Modifier,
     onClick: () -> Unit = {},
 ) {
-    MessageCard(message, onClick = onClick) {
+    MessageCard(message, onClick = onClick, viewModel = viewModel) {
         Text("file: " + content.document.fileName)
     }
 }
@@ -719,7 +740,7 @@ fun LocationMessage(
 ) {
 
     val context = LocalContext.current
-    MessageCard(message, onClick = onClick, contentPadding = PaddingValues(0.dp)) {
+    MessageCard(message, onClick = onClick, contentPadding = PaddingValues(0.dp), viewModel = viewModel) {
 
         MapView(
             onLoad = {
@@ -763,7 +784,7 @@ fun AnimatedEmojiMessage(
     modifier: Modifier = Modifier,
     onClick: () -> Unit = {}
 ) {
-    MessageCard(message, onClick = onClick) {
+    MessageCard(message, onClick = onClick, viewModel = viewModel) {
         Text(content.emoji)
     }
 }
@@ -779,7 +800,7 @@ fun AnimationMessage(
     val path =
         remember { viewModel.fetchFile(content.animation.animation) }.collectAsState(initial = null)
 
-    MessageCard(message, onClick = onClick, contentPadding = PaddingValues(0.dp)) {
+    MessageCard(message, onClick = onClick, contentPadding = PaddingValues(0.dp), viewModel = viewModel) {
 
         path.value?.also {
             VideoView(videoUri = it, repeat = true)
@@ -795,7 +816,7 @@ fun CallMessage(
     modifier: Modifier = Modifier,
     onClick: () -> Unit = {},
 ) {
-    MessageCard(message, onClick = onClick) {
+    MessageCard(message, onClick = onClick, viewModel = viewModel) {
         Text("Call")
     }
 }
@@ -808,7 +829,7 @@ fun PollMessage(
     modifier: Modifier = Modifier,
     onClick: () -> Unit = {}
 ) {
-    MessageCard(message, onClick = onClick) {
+    MessageCard(message, onClick = onClick, viewModel = viewModel) {
         Text("Poll")
     }
 }
@@ -821,7 +842,7 @@ fun ContactMessage(
     modifier: Modifier = Modifier,
     onClick: () -> Unit = {}
 ) {
-    MessageCard(message, onClick = onClick) {
+    MessageCard(message, onClick = onClick, viewModel = viewModel) {
         val name = content.contact.let { it.firstName + " " + it.lastName }
         val number = content.contact.phoneNumber
         Text("Contact:\n $name, $number")
@@ -829,8 +850,8 @@ fun ContactMessage(
 }
 
 @Composable
-fun UnsupportedMessage(message: TdApi.Message, modifier: Modifier = Modifier, onClick: () -> Unit = {}) {
-    MessageCard(message, onClick = onClick) {
+fun UnsupportedMessage(message: TdApi.Message, viewModel: ChatViewModel, modifier: Modifier = Modifier, onClick: () -> Unit = {}) {
+    MessageCard(message, onClick = onClick, viewModel = viewModel) {
         Text("Unsupported message")
     }
 }

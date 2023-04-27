@@ -32,7 +32,7 @@ import kotlin.math.sign
 @HiltViewModel
 class ChatViewModel @Inject constructor(
     val client: TelegramClient,
-    private val chatProvider: ChatProvider,
+    val chatProvider: ChatProvider,
     val messageProvider: MessageProvider,
     @ApplicationContext context: Context
 ) : ViewModel() {

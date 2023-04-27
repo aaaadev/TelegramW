@@ -13,7 +13,7 @@ import java.util.concurrent.locks.ReentrantLock
 import javax.inject.Inject
 import kotlin.concurrent.withLock
 
-class TopicProvider @Inject constructor(private val client: TelegramClient, private val chatId: Long, private val initialTopics: TdApi.ForumTopics) {
+class TopicProvider @Inject constructor(private val client: TelegramClient) {
 
     private val TAG = this::class.simpleName
 
@@ -38,17 +38,17 @@ class TopicProvider @Inject constructor(private val client: TelegramClient, priv
         }
     }
 
-    init {
+    fun initialize(chatId: Long, initialTopics: ForumTopics) {
         var _list = mutableListOf<Long>()
         initialTopics.topics.onEach { topic ->
-            _list.add(topic.info.messageThreadId)
-            _threadData.value = _threadData.value.put(topic.info.messageThreadId, topic)
+            _list.add(topic.lastMessage!!.messageThreadId)
+            _threadData.value = _threadData.value.put(topic.lastMessage!!.messageThreadId, topic)
         }
         _threadIds.value = _list.toList()
 
         client.updateFlow.onEach {
             when(it) {
-                /*is TdApi.UpdateChatLastMessage -> {
+                is TdApi.UpdateChatLastMessage -> {
                     if (chatId == it.chatId) {
                         it.lastMessage?.let { it1 ->
                             updateProperty(it1.messageThreadId) { topic ->
@@ -57,7 +57,7 @@ class TopicProvider @Inject constructor(private val client: TelegramClient, priv
                         }
                         updateTopicPositions(it.chatId, it.positions)
                     }
-                }*/
+                }
                 is TdApi.UpdateForumTopicInfo -> {
                     if (chatId == it.chatId) {
                         updateProperty(it.info.messageThreadId) { topic ->

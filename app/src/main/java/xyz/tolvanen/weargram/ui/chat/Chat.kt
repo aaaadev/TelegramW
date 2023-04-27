@@ -54,8 +54,14 @@ fun ChatScreen(navController: NavController, chatId: Long, threadId: Long?, view
         }
         ChatState.Ready -> {
             DisposableEffect(viewModel) {
-                viewModel.onStart(chatId)
-                onDispose { viewModel.onStop(chatId) }
+                if (threadId == null) {
+                    viewModel.onStart(chatId)
+                }
+                onDispose {
+                    if (threadId == null) {
+                        viewModel.onStop(chatId)
+                    }
+                }
             }
 
             ChatScaffold(navController, chatId, threadId, viewModel)
@@ -249,25 +255,11 @@ fun MessageItem(
                 modifier = Modifier.padding(bottom = 4.dp)
             )
         }
-
-        Box(modifier = Modifier.fillMaxWidth()) {
-            Sender(
-                sender,
-                viewModel,
-                navController,
-                modifier = Modifier
-                    .align(Alignment.CenterStart)
-                    .clickable {
-                        Log.d("Chat", "User was clicked")
-                    }
-            )
-        }
         Box(
             modifier = Modifier
                 .fillMaxWidth()
                 .clickable {
-                    navController.navigate(Screen.MessageMenu.buildRoute(chat.id, message.id))
-                    Log.d("Box", "was clicked")
+                    //navController.navigate(Screen.MessageMenu.buildRoute(chat.id, message.id))
                 },
             contentAlignment = if (message.isOutgoing) Alignment.CenterEnd else Alignment.CenterStart,
 

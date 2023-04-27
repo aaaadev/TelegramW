@@ -1,6 +1,10 @@
 package xyz.tolvanen.weargram.ui.topic
 
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.focusable
 import androidx.compose.foundation.gestures.animateScrollBy
 import androidx.compose.foundation.layout.*
@@ -9,12 +13,15 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.painter.ColorPainter
 import androidx.compose.ui.input.rotary.onRotaryScrollEvent
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.style.TextOverflow
@@ -24,11 +31,15 @@ import androidx.navigation.NavController
 import androidx.wear.compose.material.*
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.filterIsInstance
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import org.drinkless.tdlib.TdApi
 import org.drinkless.tdlib.TdApi.ForumTopics
+import xyz.tolvanen.weargram.R
 import xyz.tolvanen.weargram.Screen
 import xyz.tolvanen.weargram.client.TopicProvider
+import xyz.tolvanen.weargram.ui.info.InfoImage
+import xyz.tolvanen.weargram.ui.info.PlaceholderInfoImage
 import xyz.tolvanen.weargram.ui.util.TopicMessageStatusIcon
 import java.text.DateFormat
 import java.text.SimpleDateFormat
@@ -36,6 +47,7 @@ import java.util.*
 
 @Composable
 fun TopicScreen(chatId: Long, navController: NavController, viewModel: TopicViewModel) {
+    viewModel.initialize(chatId)
     TopicScaffold(chatId, navController, viewModel)
 }
 
@@ -45,11 +57,8 @@ fun TopicScaffold(chatId: Long, navController: NavController, viewModel: TopicVi
     val listState = rememberScalingLazyListState()
     val coroutineScope = rememberCoroutineScope()
     val focusRequester = remember { FocusRequester() }
-    val topicsValue = viewModel.getTopics(chatId)
-    topicsValue?.let {
-        val topicProvider = TopicProvider(viewModel.client, chatId, it)
-    val topics by topicProvider.threadIds.collectAsState()
-    val topicData by topicProvider.threadData.collectAsState()
+    val topics by viewModel.topicProvider.threadIds.collectAsState()
+    val topicData by viewModel.topicProvider.threadData.collectAsState()
 
     Scaffold(
         positionIndicator = {
@@ -79,38 +88,37 @@ fun TopicScaffold(chatId: Long, navController: NavController, viewModel: TopicVi
                     val info = viewModel.getTopicInfo(chatId, it.lastMessage!!.id).collectAsState(
                         initial = null
                     )
-                    if (info.value == null) {
-                        ChatItem(
-                            it,
-                            onClick = {
-                                navController.navigate(
-                                    Screen.Chat.buildRoute(
-                                        chatId,
-                                        it.info.messageThreadId
+                        if (info.value == null) {
+                            ChatItem(
+                                it,
+                                onClick = {
+                                    navController.navigate(
+                                        Screen.Chat.buildRoute(
+                                            chatId,
+                                            it.info.messageThreadId
+                                        )
                                     )
-                                )
-                            },
-                            viewModel
-                        )
-                    } else {
-                        ChatItem(
-                            it,
-                            onClick = {
-                                navController.navigate(
+                                },
+                                viewModel
+                            )
+                        } else {
+                            ChatItem(
+                                it,
+                                onClick = {
+                                    navController.navigate(
                                         Screen.Chat.buildRoute(
                                             chatId,
                                             info.value!!.messageThreadId
                                         )
 
-                                )
-                            },
-                            viewModel
-                        )
-                    }
+                                    )
+                                },
+                                viewModel
+                            )
+                        }
                 }
             }
         }
-    }
     }
 }
 
@@ -215,8 +223,23 @@ fun ChatItem(topic: TdApi.ForumTopic, onClick: () -> Unit = {}, viewModel: Topic
         onClick = onClick,
         backgroundPainter = ColorPainter(MaterialTheme.colors.surface),
     ) {
-
         Row(horizontalArrangement = Arrangement.SpaceBetween) {
+            val emojis: State<TdApi.Stickers?> = viewModel.getCustomEmoji(listOf(topic.info.icon.customEmojiId)).collectAsState(
+                initial = null
+            )
+            emojis.value?.also { emojisValue ->
+                emojisValue.stickers?.also { stickers ->
+                    if (stickers.isNotEmpty()) {
+                        stickers[0]?.also { emoji ->
+                            viewModel.fetchPhoto(emoji.thumbnail!!.file)
+                                .collectAsState(null).value?.also { img ->
+                                    Image(img, null, Modifier.size(20.dp))
+                                }
+                        }
+                    }
+                }
+            }
+            Spacer(modifier = Modifier.width(7.dp))
             // Chat name
             Text(
                 text = topic.info.name,
@@ -240,10 +263,12 @@ fun ChatItem(topic: TdApi.ForumTopic, onClick: () -> Unit = {}, viewModel: Topic
             Row(
                 modifier = Modifier.padding(start = 2.dp)
             ) {
-                topic.lastMessage?.also {message ->
-                    TopicMessageStatusIcon(message, topic, modifier = Modifier
-                        .size(20.dp)
-                        .padding(top = 4.dp))
+                topic.lastMessage?.also { message ->
+                    TopicMessageStatusIcon(
+                        message, topic, modifier = Modifier
+                            .size(20.dp)
+                            .padding(top = 4.dp)
+                    )
                 }
 
                 if (topic.unreadMentionCount > 0) {
@@ -256,7 +281,6 @@ fun ChatItem(topic: TdApi.ForumTopic, onClick: () -> Unit = {}, viewModel: Topic
                     )
                 }
             }
-
         }
     }
 }
