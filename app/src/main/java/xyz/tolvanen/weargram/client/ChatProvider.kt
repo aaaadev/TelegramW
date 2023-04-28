@@ -179,7 +179,7 @@ class ChatProvider @Inject constructor(private val client: TelegramClient) {
     private fun syncThread(chatId: Long) {
         scope.launch {
             val topicsFlow: Flow<TdApi.ForumTopics> = client.sendRequest(TdApi.GetForumTopics(chatId, "", 0, 0, 0, Int.MAX_VALUE)).filterIsInstance()
-            topicsFlow.collect() { topics ->
+            topicsFlow.collect { topics ->
                 if (topics.topics == null) {
                     _threads.value.remove(chatId)
                     _threadData.value.remove(chatId)

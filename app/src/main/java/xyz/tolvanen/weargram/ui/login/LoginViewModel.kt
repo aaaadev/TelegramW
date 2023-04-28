@@ -65,6 +65,9 @@ class LoginViewModel @Inject constructor(
                 Authorization.AUTHORIZED -> {
                     loginState.value = LoginState.Authorized
                 }
+                else -> {
+
+                }
             }
         }.launchIn(viewModelScope)
 

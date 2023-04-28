@@ -72,7 +72,7 @@ fun HomeScaffold(navController: NavController, viewModel: HomeViewModel) {
     val forums by viewModel.chatProvider.threads.collectAsState()
     //val forumData by viewModel.chatProvider.threadData.collectAsState()
 
-    Log.d("HomeScaffold", "chats: " + chats?.size.toString())
+    Log.d("HomeScaffold", "chats: " + chats.size.toString())
     Log.d("HomeScaffold", "chatData: " + chatData.size.toString())
 
     Scaffold(
@@ -137,7 +137,7 @@ fun HomeScaffold(navController: NavController, viewModel: HomeViewModel) {
 }
 
 @Composable
-fun ChatItem(chat: TdApi.Chat, onClick: () -> Unit = {}, viewModel: HomeViewModel) {
+fun ChatItem(chat: Chat, onClick: () -> Unit = {}, viewModel: HomeViewModel) {
     Card(
         onClick = onClick,
         backgroundPainter = ColorPainter(MaterialTheme.colors.surface),

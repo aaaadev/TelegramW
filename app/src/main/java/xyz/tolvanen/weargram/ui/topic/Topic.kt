@@ -234,12 +234,12 @@ fun ChatItem(topic: TdApi.ForumTopic, onClick: () -> Unit = {}, viewModel: Topic
                             viewModel.fetchPhoto(emoji.thumbnail!!.file)
                                 .collectAsState(null).value?.also { img ->
                                     Image(img, null, Modifier.size(20.dp))
+                                    Spacer(modifier = Modifier.width(7.dp))
                                 }
                         }
                     }
                 }
             }
-            Spacer(modifier = Modifier.width(7.dp))
             // Chat name
             Text(
                 text = topic.info.name,

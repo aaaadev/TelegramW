@@ -72,6 +72,24 @@ fun ProfileChip(viewModel: MainMenuViewModel, navController: NavController) {
 }
 
 @Composable
+fun SettingsChip(viewModel: MainMenuViewModel, navController: NavController) {
+    Chip(
+        modifier = Modifier.fillMaxWidth(0.9f),
+        onClick = {
+            navController.navigate(Screen.Settings.buildRoute())
+        },
+        label = { Text("Settings") },
+        icon = {
+            Icon(
+                painter = painterResource(id = R.drawable.outline_settings_24),
+                contentDescription = null
+            )
+        },
+        colors = ChipDefaults.chipColors(backgroundColor = MaterialTheme.colors.surface)
+    )
+}
+
+@Composable
 fun ExitChip(viewModel: MainMenuViewModel, navController: NavController) {
     Chip(
         modifier = Modifier.fillMaxWidth(0.9f),
@@ -79,6 +97,12 @@ fun ExitChip(viewModel: MainMenuViewModel, navController: NavController) {
             exitProcess(0)
         },
         label = { Text("Exit") },
+        icon = {
+            Icon(
+                painter = painterResource(id = R.drawable.outline_exit_to_app_24),
+                contentDescription = null
+            )
+        },
         colors = ChipDefaults.chipColors(backgroundColor = MaterialTheme.colors.surface)
     )
 }
@@ -94,6 +118,7 @@ fun MainMenuScreen(navController: NavController, viewModel: MainMenuViewModel) {
     ) {
         item { LogoutChip(viewModel, navController) }
         item { ProfileChip(viewModel, navController) }
+        item { SettingsChip(viewModel, navController) }
         item { ExitChip(viewModel, navController) }
     }
 }

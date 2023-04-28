@@ -255,6 +255,16 @@ fun MessageItem(
                 modifier = Modifier.padding(bottom = 4.dp)
             )
         }
+        Box(modifier = Modifier.fillMaxWidth()) {
+            Sender(
+                sender,
+                viewModel,
+                navController,
+                modifier = Modifier
+                    .align(Alignment.CenterStart)
+                    .clickable {}
+            )
+        }
         Box(
             modifier = Modifier
                 .fillMaxWidth()

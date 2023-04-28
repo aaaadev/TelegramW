@@ -12,11 +12,18 @@ import android.content.Intent
 import android.content.ServiceConnection
 import android.os.Bundle
 import android.os.IBinder
+import android.util.Log
 import androidx.activity.compose.setContent
 import androidx.appcompat.app.AppCompatActivity
+import androidx.compose.runtime.collectAsState
+import androidx.compose.ui.platform.LocalContext
+import androidx.datastore.core.DataStore
+import androidx.lifecycle.ViewModelProvider
+import com.codelab.android.datastore.UserPreferences
 import dagger.hilt.android.AndroidEntryPoint
 import org.osmdroid.config.Configuration
 import xyz.tolvanen.weargram.ui.App
+import xyz.tolvanen.weargram.ui.settings.UserPreferencesRepository
 
 @AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
@@ -38,19 +45,35 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
+    private fun enableNotification() {
         val serviceIntent = Intent(applicationContext, NotificationService::class.java)
         applicationContext.startForegroundService(serviceIntent)
 
         Intent(this, NotificationService::class.java).also { intent ->
             bindService(intent, serviceConnection, Context.BIND_AUTO_CREATE)
         }
+        notificationService?.also {
+            it.onCreate()
+        }
+    }
+
+    private fun disableNotification() {
+        Log.d("MainActivity", "disable notification")
+        if (bound) {
+            unbindService(serviceConnection)
+        }
+        notificationService?.also {
+            it.onDestroy()
+        }
+    }
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
 
         Configuration.getInstance().userAgentValue = BuildConfig.APPLICATION_ID
 
         setContent {
-            App()
+            App(enableNotification = { this.enableNotification() }, disableNotification = { this.disableNotification() })
         }
     }
 }
