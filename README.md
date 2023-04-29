@@ -1,4 +1,4 @@
-# Weargram
+# Telegram W
 
 Telegram client for Wear OS based on tdlib and Compose.
 
