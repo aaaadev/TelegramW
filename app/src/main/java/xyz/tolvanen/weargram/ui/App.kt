@@ -29,6 +29,7 @@ import xyz.tolvanen.weargram.ui.home.HomeScreen
 import xyz.tolvanen.weargram.ui.info.InfoScreen
 import xyz.tolvanen.weargram.ui.login.LoginScreen
 import xyz.tolvanen.weargram.ui.message.MessageMenuScreen
+import xyz.tolvanen.weargram.ui.message.SelectReactionScreen
 import xyz.tolvanen.weargram.ui.settings.*
 import xyz.tolvanen.weargram.ui.topic.TopicScreen
 import xyz.tolvanen.weargram.ui.util.MapScreen
@@ -144,6 +145,19 @@ private fun MainNavHost(navController: NavHostController) {
 
         composable(Screen.Settings.route) {
             SettingsScreen(viewModel = hiltViewModel(it))
+        }
+
+        composable(Screen.SelectReaction.route) {
+            Screen.MessageMenu.getChatId(it)?.also { chatId ->
+                Screen.MessageMenu.getMessageId(it)?.also { messageId ->
+                    SelectReactionScreen(
+                        navController = navController,
+                        chatId = chatId,
+                        messageId = messageId,
+                        viewModel = hiltViewModel(it)
+                    )
+                }
+            }
         }
     }
 }

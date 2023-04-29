@@ -42,6 +42,15 @@ sealed class Screen(val route: String) {
             entry.arguments?.getString("messageId")?.toLong()
     }
 
+    object SelectReaction : Screen("selectReaction/{chatId}/{messageId}") {
+        fun buildRoute(chatId: Long, messageId: Long): String = "selectReaction/$chatId/$messageId"
+        fun getChatId(entry: NavBackStackEntry): Long? =
+            entry.arguments?.getString("chatId")?.toLong()
+
+        fun getMessageId(entry: NavBackStackEntry): Long? =
+            entry.arguments?.getString("messageId")?.toLong()
+    }
+
     object Info : Screen("info/{type}/{id}") {
         fun buildRoute(type: String, id: Long): String = "info/$type/$id"
         fun getId(entry: NavBackStackEntry): Long? =

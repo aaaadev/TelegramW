@@ -3,23 +3,25 @@ package xyz.tolvanen.weargram.ui.message
 import android.app.RemoteInput
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.view.inputmethod.EditorInfo
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Delete
+import androidx.compose.material.icons.outlined.Edit
+import androidx.compose.material.icons.outlined.EmojiEmotions
 import androidx.compose.material.icons.outlined.Reply
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import androidx.wear.compose.material.Scaffold
-import androidx.wear.compose.material.ScalingLazyColumn
-import androidx.wear.compose.material.Vignette
-import androidx.wear.compose.material.VignettePosition
+import androidx.wear.compose.material.*
 import androidx.wear.input.RemoteInputIntentHelper
 import androidx.wear.input.wearableExtender
 import kotlinx.coroutines.CompletableDeferred
@@ -27,8 +29,10 @@ import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.launch
 import org.drinkless.tdlib.TdApi
+import xyz.tolvanen.weargram.Screen
 import xyz.tolvanen.weargram.ui.util.MenuItem
 import xyz.tolvanen.weargram.ui.util.YesNoDialog
+import kotlin.math.min
 
 @Composable
 fun MessageMenuScreen(
@@ -79,6 +83,28 @@ fun MessageMenuScaffold(
             result.await()
         }
     }
+    val editMessage = { text: String ->
+        scope.launch {
+            val result = CompletableDeferred<TdApi.Message>()
+            scope.launch {
+                viewModel.client.sendRequest(TdApi.EditMessageText(
+                    chatId,
+                    message.id,
+                    null,
+                    TdApi.InputMessageText(
+                        TdApi.FormattedText(
+                            text, emptyArray()
+                        ),
+                        false,
+                        false,
+                    )
+                )).filterIsInstance<TdApi.Message>().collect {
+                    result.complete(it)
+                }
+            }
+            result.await()
+        }
+    }
     val showDeleteDialog = remember { mutableStateOf(false) }
     val launcher =
         rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) {
@@ -88,7 +114,14 @@ fun MessageMenuScaffold(
                 replyMessage(activityInput.toString())
             }
         }
-
+    val editlauncher =
+        rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) {
+            it.data?.let { data ->
+                val results: Bundle = RemoteInput.getResultsFromIntent(data)
+                val activityInput: CharSequence? = results.getCharSequence("input")
+                editMessage(activityInput.toString())
+            }
+        }
     if (showDeleteDialog.value) {
         YesNoDialog(text = "Delete message?",
             onYes = {
@@ -110,22 +143,139 @@ fun MessageMenuScaffold(
                         ?: 0) == (viewModel.getMe()?.id ?: 0)
                 ) {
                     item { DeleteItem(onClick = { showDeleteDialog.value = true }) }
+                    when (val msgType = message.content) {
+                        is TdApi.MessageText -> {
+                            item {
+                                EditItem(onClick = {
+                                    val intent: Intent =
+                                        RemoteInputIntentHelper.createActionRemoteInputIntent()
+                                    val remoteInputs: List<RemoteInput> = listOf(
+                                        RemoteInput.Builder("input").setLabel("Text message?")
+                                            .wearableExtender {
+                                                setEmojisAllowed(true)
+                                                setInputActionType(EditorInfo.IME_ACTION_DONE)
+                                            }.build()
+                                    )
+                                    RemoteInputIntentHelper.putRemoteInputsExtra(
+                                        intent,
+                                        remoteInputs
+                                    )
+                                    editlauncher.launch(intent)
+                                })
+                            }
+                        }
+                    }
                 }
-                item { ReplyItem(onClick = { val intent: Intent = RemoteInputIntentHelper.createActionRemoteInputIntent()
-                    val remoteInputs: List<RemoteInput> = listOf(
-                        RemoteInput.Builder("input").setLabel("Text message?").wearableExtender {
-                            setEmojisAllowed(true)
-                            setInputActionType(EditorInfo.IME_ACTION_SEND)
-                        }.build()
-                    )
-                    RemoteInputIntentHelper.putRemoteInputsExtra(intent, remoteInputs)
-                    launcher.launch(intent) }) }
+                item {
+                    ReactionItem(onClick = {
+                        navController.navigate(
+                            Screen.SelectReaction.buildRoute(
+                                chatId,
+                                message.id
+                            )
+                        )
+                    })
+                }
+                item {
+                    Text("Reply message")
+                }
+                item {
+                    ReplyItem(onClick = {
+                        val intent: Intent = RemoteInputIntentHelper.createActionRemoteInputIntent()
+                        val remoteInputs: List<RemoteInput> = listOf(
+                            RemoteInput.Builder("input").setLabel("Text message?")
+                                .wearableExtender {
+                                    setEmojisAllowed(true)
+                                    setInputActionType(EditorInfo.IME_ACTION_SEND)
+                                }.build()
+                        )
+                        RemoteInputIntentHelper.putRemoteInputsExtra(intent, remoteInputs)
+                        launcher.launch(intent)
+                    })
+                }
+                message.interactionInfo?.also { interactionInfo ->
+                    item {
+                        Text("Reactions")
+                    }
+                    for (i in 0 until interactionInfo.reactions.size) {
+                        item {
+                            Row(modifier = Modifier.fillMaxWidth(0.85f), horizontalArrangement = Arrangement.SpaceBetween) {
+                                when (val reactionType =
+                                    interactionInfo.reactions[i].type) {
+                                    is TdApi.ReactionTypeEmoji -> {
+                                        val emoji =
+                                            viewModel.getAnimatedEmoji(reactionType.emoji)
+                                                .collectAsState(
+                                                    initial = null
+                                                )
+                                        emoji.value?.also { emojiValue ->
+                                            emojiValue.sticker?.also {
+                                                EmojiImage(
+                                                    photo = it.thumbnail!!.file,
+                                                    viewModel = viewModel,
+                                                    onClick = {
+                                                            viewModel.removeMessageReaction(
+                                                                chatId,
+                                                                message.id,
+                                                                reactionType
+                                                            )
+                                                    }
+                                                )
+                                                Text(interactionInfo.reactions[i].totalCount.toString(), style = MaterialTheme.typography.title1)
+                                            }
+                                        }
+                                    }
+                                    is TdApi.ReactionTypeCustomEmoji -> {
+                                        val emoji =
+                                            viewModel.getCustomEmoji(listOf(reactionType.customEmojiId))
+                                                .collectAsState(
+                                                    initial = null
+                                                )
+                                        emoji.value?.also { emojiValue ->
+                                            emojiValue.stickers?.also { stickers ->
+                                                stickers[0]?.also {
+                                                    EmojiImage(
+                                                        photo = it.thumbnail!!.file,
+                                                        viewModel = viewModel,
+                                                        onClick = {
+                                                                viewModel.removeMessageReaction(
+                                                                    chatId,
+                                                                    message.id,
+                                                                    reactionType
+                                                                )
+                                                        }
+                                                    )
+                                                    Text(interactionInfo.reactions[i].totalCount.toString(), style = MaterialTheme.typography.title1)
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
             }
-
         }
     }
+}
 
+@Composable
+fun ReactionItem(onClick: () -> Unit) {
+    MenuItem(
+        title = "Reaction",
+        imageVector = Icons.Outlined.EmojiEmotions,
+        onClick = onClick
+    )
+}
 
+@Composable
+fun EditItem(onClick: () -> Unit) {
+    MenuItem(
+        title = "Edit",
+        imageVector = Icons.Outlined.Edit,
+        onClick = onClick
+    )
 }
 
 @Composable
@@ -140,7 +290,7 @@ fun DeleteItem(onClick: () -> Unit) {
 @Composable
 fun ReplyItem(onClick: () -> Unit) {
     MenuItem(
-        title = "Reply",
+        title = "Text",
         imageVector = Icons.Outlined.Reply,
         onClick = onClick
     )

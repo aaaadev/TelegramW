@@ -114,7 +114,6 @@ class NotificationProvider @Inject constructor(
     private fun updateNotification(update: TdApi.UpdateNotification) {
 
         //Log.d(TAG, update.toString())
-
         groups[update.notificationGroupId]?.apply {
             val idx =
                 notifications.indexOfFirst { notification -> notification.id == update.notification.id }
@@ -124,7 +123,6 @@ class NotificationProvider @Inject constructor(
 
 
         refreshNotifications()
-
     }
 
     data class MessageObject(val text: String, val sender: Person, val timestamp: Long)
