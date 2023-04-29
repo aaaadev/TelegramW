@@ -48,6 +48,10 @@ class TopicViewModel  @Inject constructor(
     fun getTopics(chatId: Long): ForumTopics? {
         return chatProvider.threadData.value[chatId]
     }
+
+    fun getChat(chatId: Long): TdApi.Chat? {
+        return chatProvider.getChat(chatId)
+    }
     fun getTopicInfo(chatId: Long, threadId: Long): Flow<TdApi.MessageThreadInfo> {
         return client.sendRequest(TdApi.GetMessageThread(chatId, threadId)).filterIsInstance()
     }

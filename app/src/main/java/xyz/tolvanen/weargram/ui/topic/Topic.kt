@@ -40,6 +40,7 @@ import xyz.tolvanen.weargram.Screen
 import xyz.tolvanen.weargram.client.TopicProvider
 import xyz.tolvanen.weargram.ui.info.InfoImage
 import xyz.tolvanen.weargram.ui.info.PlaceholderInfoImage
+import xyz.tolvanen.weargram.ui.util.MenuItem
 import xyz.tolvanen.weargram.ui.util.TopicMessageStatusIcon
 import java.text.DateFormat
 import java.text.SimpleDateFormat
@@ -83,6 +84,24 @@ fun TopicScaffold(chatId: Long, navController: NavController, viewModel: TopicVi
                 .focusable()
                 .wrapContentHeight(),
         ) {
+            item {
+                viewModel.getChat(chatId)?.also { chat ->
+                    (chat.type as? TdApi.ChatTypeSupergroup)?.also {
+                        MenuItem(
+                            modifier = Modifier.padding(bottom = 10.dp),
+                            title = "Forum Info",
+                            iconPainter = painterResource(id = R.drawable.baseline_info_24),
+                            onClick = {
+                                navController.navigate(
+                                    Screen.Info.buildRoute(
+                                        "channel",
+                                        it.supergroupId
+                                    )
+                                )
+                            })
+                    }
+                }
+            }
             items(topics) { topic ->
                 topicData[topic]?.let {
                     val info = viewModel.getTopicInfo(chatId, it.lastMessage!!.id).collectAsState(

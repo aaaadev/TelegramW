@@ -2,6 +2,7 @@ package xyz.tolvanen.weargram.ui.info
 
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -25,11 +26,11 @@ import org.drinkless.tdlib.TdApi
 
 @Composable
 fun InfoScreen(type: String, id: Long, viewModel: InfoViewModel, navController: NavController) {
-
+    Log.d("InfoScreen", type)
     when (type) {
         "user" -> UserInfoScreen(id, viewModel, navController)
         "group" -> GroupInfoScreen(id, viewModel, navController)
-        //"channel" -> ChannelInfoScreen(id, viewModel, navController)
+        "channel" -> ChannelInfoScreen(id, viewModel, navController)
         else -> {
             navController.popBackStack()
         }

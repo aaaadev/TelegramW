@@ -22,6 +22,8 @@ class InfoViewModel @Inject constructor(
     fun getUser(id: Long): TdApi.User? { return client.getUser(id) }
     fun getGroup(id: Long): TdApi.BasicGroup? { return client.getBasicGroup(id) }
     fun getGroupInfo(id: Long): TdApi.BasicGroupFullInfo? { return client.getBasicGroupInfo(id) }
+    fun getChannel(id: Long): TdApi.Supergroup? { return client.getSupergroup(id) }
+    fun getChannelInfo(id: Long): TdApi.SupergroupFullInfo? { return client.getSupergroupInfo(id) }
     fun fetchPhoto(photo: TdApi.File): Flow<ImageBitmap?> {
         return client.getFilePath(photo).map {
             it?.let {
@@ -36,6 +38,14 @@ class InfoViewModel @Inject constructor(
 
     fun getGroupChat(groupId: Long): Flow<TdApi.Chat> {
         return client.sendRequest(TdApi.CreateBasicGroupChat(groupId, true)).filterIsInstance()
+    }
+
+    fun getChannelChat(channelId: Long): Flow<TdApi.Chat> {
+        return client.sendRequest(TdApi.CreateSupergroupChat(channelId, true)).filterIsInstance()
+    }
+
+    fun getMembers(channelId: Long, limit: Int): Flow<TdApi.ChatMembers> {
+        return client.sendRequest(TdApi.GetSupergroupMembers(channelId, null, limit, 0)).filterIsInstance()
     }
 
 }

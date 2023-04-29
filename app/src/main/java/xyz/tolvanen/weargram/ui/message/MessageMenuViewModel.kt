@@ -18,6 +18,10 @@ class MessageMenuViewModel @Inject constructor(val client: TelegramClient, val m
         return client.sendRequest(TdApi.GetMessage(chatId, messageId)).filterIsInstance()
     }
 
+    fun getMe(): TdApi.User? {
+        return client.getMe()
+    }
+
     fun deleteMessage(chatId: Long, messageId: Long) {
         client.sendUnscopedRequest(TdApi.DeleteMessages(chatId, longArrayOf(messageId), true))
     }

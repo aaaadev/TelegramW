@@ -59,9 +59,6 @@ class MainActivity : AppCompatActivity() {
 
     private fun disableNotification() {
         Log.d("MainActivity", "disable notification")
-        if (bound) {
-            unbindService(serviceConnection)
-        }
         notificationService?.also {
             it.onDestroy()
         }

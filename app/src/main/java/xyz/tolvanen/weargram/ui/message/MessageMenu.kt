@@ -106,7 +106,11 @@ fun MessageMenuScaffold(
                 verticalArrangement = Arrangement.spacedBy(4.dp),
                 modifier = Modifier.fillMaxWidth(),
             ) {
-                item { DeleteItem(onClick = { showDeleteDialog.value = true }) }
+                if (((message.senderId as? TdApi.MessageSenderUser)?.userId
+                        ?: 0) == (viewModel.getMe()?.id ?: 0)
+                ) {
+                    item { DeleteItem(onClick = { showDeleteDialog.value = true }) }
+                }
                 item { ReplyItem(onClick = { val intent: Intent = RemoteInputIntentHelper.createActionRemoteInputIntent()
                     val remoteInputs: List<RemoteInput> = listOf(
                         RemoteInput.Builder("input").setLabel("Text message?").wearableExtender {

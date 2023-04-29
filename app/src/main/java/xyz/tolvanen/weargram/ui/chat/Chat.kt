@@ -147,7 +147,16 @@ fun ChatScaffold(navController: NavController, chatId: Long, threadId: Long?, vi
                             messages[prevId],
                             viewModel,
                             navController,
-                            displayDate = displayDate
+                            displayDate = displayDate,
+                            scrollReply = { replyMsgId ->
+                                coroutineScope.launch {
+                                    listState.animateScrollToItem(
+                                        messageIds.indexOf(
+                                            replyMsgId
+                                        ) + 1
+                                    )
+                                }
+                            }
                         )
                     }
                 }
@@ -221,7 +230,8 @@ fun MessageItem(
     previousMessage: TdApi.Message?,
     viewModel: ChatViewModel,
     navController: NavController,
-    displayDate: Boolean = false
+    displayDate: Boolean = false,
+    scrollReply: (Long) -> Unit,
 ) {
 
     val chat by viewModel.chatFlow.collectAsState()
@@ -277,7 +287,7 @@ fun MessageItem(
             Box(
                 modifier = Modifier.fillMaxWidth(0.85f)
             ) {
-                MessageContent(message, viewModel, navController)
+                MessageContent(message, viewModel, navController, scrollReply = scrollReply)
             }
         }
     }

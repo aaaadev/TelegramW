@@ -49,45 +49,46 @@ fun MessageContent(
     message: TdApi.Message,
     viewModel: ChatViewModel,
     navController: NavController,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    scrollReply: (Long) -> Unit,
 ) {
     val onClick = { navController.navigate(Screen.MessageMenu.buildRoute(message.chatId, message.id)) }
     when (val content = message.content) {
-        is TdApi.MessageText -> TextMessage(message, content, viewModel, modifier, onClick = onClick)
+        is TdApi.MessageText -> TextMessage(message, content, viewModel, modifier, onClick = onClick, scrollReply = scrollReply)
         is TdApi.MessagePhoto -> PhotoMessage(
-            message, content, viewModel, modifier, onClick = onClick
+            message, content, viewModel, modifier, onClick = onClick, scrollReply = scrollReply
         )
         is TdApi.MessageAudio -> AudioMessage(
-            message, content, viewModel, modifier, onClick = onClick
+            message, content, viewModel, modifier, onClick = onClick, scrollReply = scrollReply
         )
         is TdApi.MessageVoiceNote -> VoiceNoteMessage(
-            message, content, viewModel, modifier, onClick = onClick
+            message, content, viewModel, modifier, onClick = onClick, scrollReply = scrollReply
         )
         is TdApi.MessageVideo -> VideoMessage(
-            message, content, viewModel, navController, modifier, onClick = onClick
+            message, content, viewModel, navController, modifier, onClick = onClick, scrollReply = scrollReply
         )
         is TdApi.MessageVideoNote -> VideoNoteMessage(
-            message, content, viewModel, navController, modifier, onClick = onClick
+            message, content, viewModel, navController, modifier, onClick = onClick, scrollReply = scrollReply
         )
         is TdApi.MessageSticker -> StickerMessage(
-            message, content, viewModel, modifier, onClick = onClick
+            message, content, viewModel, modifier, onClick = onClick, scrollReply = scrollReply
         )
         is TdApi.MessageDocument -> DocumentMessage(
-            message, content, viewModel, modifier, onClick = onClick
+            message, content, viewModel, modifier, onClick = onClick, scrollReply = scrollReply
         )
         is TdApi.MessageLocation -> LocationMessage(
-            message, content, viewModel, navController, modifier, onClick = onClick
+            message, content, viewModel, navController, modifier, onClick = onClick, scrollReply = scrollReply
         )
         is TdApi.MessageAnimatedEmoji -> AnimatedEmojiMessage(
-            message, content, viewModel, modifier, onClick = onClick
+            message, content, viewModel, modifier, onClick = onClick, scrollReply = scrollReply
         )
         is TdApi.MessageAnimation -> AnimationMessage(
-            message, content, viewModel, modifier, onClick = onClick
+            message, content, viewModel, modifier, onClick = onClick, scrollReply = scrollReply
         )
-        is TdApi.MessageCall -> CallMessage(message, content, viewModel, modifier, onClick = onClick)
-        is TdApi.MessagePoll -> PollMessage(message, content, viewModel, modifier, onClick = onClick)
-        is TdApi.MessageContact -> ContactMessage(message, content, viewModel, modifier, onClick = onClick)
-        else -> UnsupportedMessage(message, viewModel, modifier, onClick = onClick)
+        is TdApi.MessageCall -> CallMessage(message, content, viewModel, modifier, onClick = onClick, scrollReply = scrollReply)
+        is TdApi.MessagePoll -> PollMessage(message, content, viewModel, modifier, onClick = onClick, scrollReply = scrollReply)
+        is TdApi.MessageContact -> ContactMessage(message, content, viewModel, modifier, onClick = onClick, scrollReply = scrollReply)
+        else -> UnsupportedMessage(message, viewModel, modifier, onClick = onClick, scrollReply = scrollReply)
     }
 }
 
@@ -98,6 +99,7 @@ fun MessageCard(
     viewModel: ChatViewModel,
     contentPadding: PaddingValues = CardDefaults.ContentPadding,
     onClick: () -> Unit = {},
+    scrollReply: (Long) -> Unit,
     content: @Composable (ColumnScope.() -> Unit),
 ) {
     Card(
@@ -116,7 +118,9 @@ fun MessageCard(
                         modifier = Modifier
                             .fillMaxWidth(0.85f)
                             .padding(start = 3.dp, bottom = 7.dp)
-                            .clickable {  }
+                            .clickable {
+                                scrollReply(message.replyToMessageId)
+                            }
                     ) {
                             ShortDescription(
                                 message = reply,
@@ -320,10 +324,11 @@ fun TextMessage(
     content: TdApi.MessageText,
     viewModel: ChatViewModel,
     modifier: Modifier = Modifier,
+    scrollReply: (Long) -> Unit,
     onClick: () -> Unit = {}
 ) {
 
-    MessageCard(message, onClick = onClick, viewModel = viewModel) {
+    MessageCard(message, onClick = onClick, viewModel = viewModel, scrollReply = scrollReply) {
 
         Column(
             horizontalAlignment = Alignment.Start
@@ -341,6 +346,7 @@ fun PhotoMessage(
     content: TdApi.MessagePhoto,
     viewModel: ChatViewModel,
     modifier: Modifier = Modifier,
+    scrollReply: (Long) -> Unit,
     onClick: () -> Unit = {}
 ) {
     val thumbnail = remember {
@@ -353,7 +359,7 @@ fun PhotoMessage(
     }
     val image = remember { viewModel.fetchPhoto(content) }.collectAsState(initial = null)
 
-    MessageCard(message, onClick = onClick, contentPadding = PaddingValues(0.dp), viewModel = viewModel) {
+    MessageCard(message, onClick = onClick, contentPadding = PaddingValues(0.dp), viewModel = viewModel, scrollReply = scrollReply) {
         Column(modifier = Modifier.fillMaxSize(), verticalArrangement = Arrangement.Top) {
 
             image.value?.also { Image(bitmap = it, contentDescription = null) }
@@ -382,6 +388,7 @@ fun AudioMessage(
     content: TdApi.MessageAudio,
     viewModel: ChatViewModel,
     modifier: Modifier = Modifier,
+    scrollReply: (Long) -> Unit,
     onClick: () -> Unit = {}
 ) {
     // TODO: think about audio playback lifecycle
@@ -392,7 +399,7 @@ fun AudioMessage(
     val position = remember { mutableStateOf(0f) }
 
 
-    MessageCard(message, onClick = onClick, viewModel = viewModel) {
+    MessageCard(message, onClick = onClick, viewModel = viewModel, scrollReply = scrollReply) {
         Box(
             modifier = Modifier.fillMaxWidth(),
             contentAlignment = Alignment.Center
@@ -456,6 +463,7 @@ fun VoiceNoteMessage(
     content: TdApi.MessageVoiceNote,
     viewModel: ChatViewModel,
     modifier: Modifier = Modifier,
+    scrollReply: (Long) -> Unit,
     onClick: () -> Unit = {}
 ) {
     // TODO: think about audio playback lifecycle
@@ -466,7 +474,7 @@ fun VoiceNoteMessage(
     val position = remember { mutableStateOf(0f) }
 
 
-    MessageCard(message, onClick = onClick, viewModel = viewModel) {
+    MessageCard(message, onClick = onClick, viewModel = viewModel, scrollReply = scrollReply) {
         Box(
             modifier = Modifier.fillMaxWidth(),
             contentAlignment = Alignment.Center
@@ -531,6 +539,7 @@ fun VideoMessage(
     viewModel: ChatViewModel,
     navController: NavController,
     modifier: Modifier = Modifier,
+    scrollReply: (Long) -> Unit,
     onClick: () -> Unit = {}
 ) {
     val path =
@@ -553,7 +562,7 @@ fun VideoMessage(
         }
     }
 
-    MessageCard(message, onClick = onClick, contentPadding = PaddingValues(0.dp), viewModel = viewModel) {
+    MessageCard(message, onClick = onClick, contentPadding = PaddingValues(0.dp), viewModel = viewModel, scrollReply = scrollReply) {
         Column(
             modifier = Modifier.fillMaxSize(), verticalArrangement = Arrangement.Top
         ) {
@@ -623,6 +632,7 @@ fun VideoNoteMessage(
     viewModel: ChatViewModel,
     navController: NavController,
     modifier: Modifier = Modifier,
+    scrollReply: (Long) -> Unit,
     onClick: () -> Unit = {},
 ) {
     val path =
@@ -638,7 +648,7 @@ fun VideoNoteMessage(
         }
     }
 
-    MessageCard(message, onClick = onClick, contentPadding = PaddingValues(0.dp), viewModel = viewModel) {
+    MessageCard(message, onClick = onClick, contentPadding = PaddingValues(0.dp), viewModel = viewModel, scrollReply = scrollReply) {
         Column(
             modifier = Modifier.fillMaxSize(), verticalArrangement = Arrangement.Top
         ) {
@@ -700,6 +710,7 @@ fun StickerMessage(
     content: TdApi.MessageSticker,
     viewModel: ChatViewModel,
     modifier: Modifier = Modifier,
+    scrollReply: (Long) -> Unit,
     onClick: () -> Unit = {},
 ) {
     val path =
@@ -710,7 +721,7 @@ fun StickerMessage(
             Column {
                 Image(bitmap = bitmap, contentDescription = null)
             }
-        } ?: MessageCard(message, onClick = onClick, viewModel = viewModel) {
+        } ?: MessageCard(message, onClick = onClick, viewModel = viewModel, scrollReply = scrollReply) {
             Text(content.sticker.emoji + " Sticker")
         }
     }
@@ -722,9 +733,10 @@ fun DocumentMessage(
     content: TdApi.MessageDocument,
     viewModel: ChatViewModel,
     modifier: Modifier = Modifier,
+    scrollReply: (Long) -> Unit,
     onClick: () -> Unit = {},
 ) {
-    MessageCard(message, onClick = onClick, viewModel = viewModel) {
+    MessageCard(message, onClick = onClick, viewModel = viewModel, scrollReply = scrollReply) {
         Text("file: " + content.document.fileName)
     }
 }
@@ -736,11 +748,12 @@ fun LocationMessage(
     viewModel: ChatViewModel,
     navController: NavController,
     modifier: Modifier = Modifier,
+    scrollReply: (Long) -> Unit,
     onClick: () -> Unit = {},
 ) {
 
     val context = LocalContext.current
-    MessageCard(message, onClick = onClick, contentPadding = PaddingValues(0.dp), viewModel = viewModel) {
+    MessageCard(message, onClick = onClick, contentPadding = PaddingValues(0.dp), viewModel = viewModel, scrollReply = scrollReply) {
 
         MapView(
             onLoad = {
@@ -782,9 +795,10 @@ fun AnimatedEmojiMessage(
     content: TdApi.MessageAnimatedEmoji,
     viewModel: ChatViewModel,
     modifier: Modifier = Modifier,
+    scrollReply: (Long) -> Unit,
     onClick: () -> Unit = {}
 ) {
-    MessageCard(message, onClick = onClick, viewModel = viewModel) {
+    MessageCard(message, onClick = onClick, viewModel = viewModel, scrollReply = scrollReply) {
         Text(content.emoji)
     }
 }
@@ -795,12 +809,13 @@ fun AnimationMessage(
     content: TdApi.MessageAnimation,
     viewModel: ChatViewModel,
     modifier: Modifier = Modifier,
+    scrollReply: (Long) -> Unit,
     onClick: () -> Unit = {},
 ) {
     val path =
         remember { viewModel.fetchFile(content.animation.animation) }.collectAsState(initial = null)
 
-    MessageCard(message, onClick = onClick, contentPadding = PaddingValues(0.dp), viewModel = viewModel) {
+    MessageCard(message, onClick = onClick, contentPadding = PaddingValues(0.dp), viewModel = viewModel, scrollReply = scrollReply) {
 
         path.value?.also {
             VideoView(videoUri = it, repeat = true)
@@ -814,9 +829,10 @@ fun CallMessage(
     content: TdApi.MessageCall,
     viewModel: ChatViewModel,
     modifier: Modifier = Modifier,
+    scrollReply: (Long) -> Unit,
     onClick: () -> Unit = {},
 ) {
-    MessageCard(message, onClick = onClick, viewModel = viewModel) {
+    MessageCard(message, onClick = onClick, viewModel = viewModel, scrollReply = scrollReply) {
         Text("Call")
     }
 }
@@ -827,9 +843,10 @@ fun PollMessage(
     content: TdApi.MessagePoll,
     viewModel: ChatViewModel,
     modifier: Modifier = Modifier,
+    scrollReply: (Long) -> Unit,
     onClick: () -> Unit = {}
 ) {
-    MessageCard(message, onClick = onClick, viewModel = viewModel) {
+    MessageCard(message, onClick = onClick, viewModel = viewModel, scrollReply = scrollReply) {
         Text("Poll")
     }
 }
@@ -840,9 +857,10 @@ fun ContactMessage(
     content: TdApi.MessageContact,
     viewModel: ChatViewModel,
     modifier: Modifier = Modifier,
+    scrollReply: (Long) -> Unit,
     onClick: () -> Unit = {}
 ) {
-    MessageCard(message, onClick = onClick, viewModel = viewModel) {
+    MessageCard(message, onClick = onClick, viewModel = viewModel, scrollReply = scrollReply) {
         val name = content.contact.let { it.firstName + " " + it.lastName }
         val number = content.contact.phoneNumber
         Text("Contact:\n $name, $number")
@@ -850,8 +868,8 @@ fun ContactMessage(
 }
 
 @Composable
-fun UnsupportedMessage(message: TdApi.Message, viewModel: ChatViewModel, modifier: Modifier = Modifier, onClick: () -> Unit = {}) {
-    MessageCard(message, onClick = onClick, viewModel = viewModel) {
+fun UnsupportedMessage(message: TdApi.Message, viewModel: ChatViewModel, modifier: Modifier = Modifier, onClick: () -> Unit = {}, scrollReply: (Long) -> Unit,) {
+    MessageCard(message, onClick = onClick, viewModel = viewModel, scrollReply = scrollReply) {
         Text("Unsupported message")
     }
 }
