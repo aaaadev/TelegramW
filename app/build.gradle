@@ -7,11 +7,11 @@ plugins {
 }
 
 android {
-    namespace 'xyz.tolvanen.weargram'
+    namespace 'moe.astar.telegramw'
     compileSdk 33
 
     defaultConfig {
-        applicationId "xyz.tolvanen.weargram"
+        applicationId "moe.astar.telegramw"
         minSdk 28
         targetSdk 33
         versionCode 1
@@ -86,8 +86,8 @@ dependencies {
 
     implementation project(':libtd')
     implementation 'com.google.code.gson:gson:2.10.1'
-    implementation  "androidx.datastore:datastore:1.0.0"
-    implementation  "com.google.protobuf:protobuf-javalite:3.22.3"
+    implementation "androidx.datastore:datastore:1.0.0"
+    implementation "com.google.protobuf:protobuf-javalite:3.22.3"
 }
 
 protobuf {

@@ -7,7 +7,7 @@
 apply plugin: 'com.android.library'
 
 android {
-    compileSdkVersion 24
+    compileSdkVersion 33
 
     sourceSets.main {
         jniLibs.srcDir 'src/main/libs'
@@ -16,7 +16,7 @@ android {
 
     defaultConfig {
         minSdkVersion 10
-        targetSdkVersion 21
+        targetSdkVersion 33
     }
     buildTypes {
         release {

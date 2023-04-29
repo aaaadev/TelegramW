@@ -1,9 +1,16 @@
 syntax = "proto3";
 
-option java_package = "xyz.tolvanen.weargram";
+option java_package = "moe.astar.telegramw";
 option java_multiple_files = true;
 
 message UserPreferences {
-  // filter for showing / hiding completed tasks
   bool notification_enabled = 1;
+}
+
+message NotificationPreferneces {
+  bool is_muted = 1;
+}
+
+message NotificationGroup {
+  map<int64, NotificationPreferneces> groups = 1;
 }
