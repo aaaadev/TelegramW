@@ -16,6 +16,7 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.filterIsInstance
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
@@ -53,14 +54,16 @@ class NotificationProvider @Inject constructor(
             .filterIsInstance<TdApi.UpdateNotificationGroup>()
             .onEach {
                 scope.launch {
-                    flow.onEach { group ->
+                    flow.first { group ->
                         val groupSetting = group.getGroupsOrDefault(
                             it.chatId,
                             NotificationPreferneces.getDefaultInstance()
                         )
-                        if (!groupSetting.isMuted) {
+                        Log.d("NotificationProvider", it.chatId.toString() + ": " + groupSetting.isEnabled.toString())
+                        if (groupSetting.isEnabled) {
                             updateNotificationGroup(it)
                         }
+                        true
                     }
                 }
             }.launchIn(scope)
@@ -94,10 +97,20 @@ class NotificationProvider @Inject constructor(
         val flow = notificationRepository.flow
         //Log.d(TAG, update.toString())
         update.groups.forEach { group ->
-            flow.onEach { notificationGroup ->
-                val notification = notificationGroup.getGroupsOrDefault(group.chatId, NotificationPreferneces.getDefaultInstance())
-                if (!notification.isMuted) {
-                    groups[group.id] = group
+            scope.launch {
+                flow.first { notificationGroup ->
+                    val notification = notificationGroup.getGroupsOrDefault(
+                        group.chatId,
+                        NotificationPreferneces.getDefaultInstance()
+                    )
+                    Log.d(
+                        "NotificationProvider",
+                        group.chatId.toString() + ": " + notification.isEnabled.toString()
+                    )
+                    if (notification.isEnabled) {
+                        groups[group.id] = group
+                    }
+                    true
                 }
             }
         }

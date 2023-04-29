@@ -76,8 +76,8 @@ fun ChannelInfoScaffold(
 
                 item {
                     NotificationToggle(
-                        state = groupSetting?.isMuted
-                            ?: NotificationPreferneces.getDefaultInstance().isMuted,
+                        state = groupSetting?.isEnabled
+                            ?: NotificationPreferneces.getDefaultInstance().isEnabled,
                         checkedChange = {
                             viewModel.setNoitificationEnabled(chatValue.id, it)
                         })

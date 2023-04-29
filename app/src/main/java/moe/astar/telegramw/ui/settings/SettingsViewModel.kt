@@ -95,7 +95,7 @@ class NotificationRepository @Inject constructor(
                 chatId,
                 defaultValue = { NotificationPreferneces.getDefaultInstance() })
             val newGroup =
-                NotificationPreferneces.newBuilder().setIsMuted(group.isMuted xor true).build()
+                NotificationPreferneces.newBuilder().setIsEnabled(group.isEnabled xor true).build()
             data.toBuilder().removeGroups(chatId).putGroups(chatId, newGroup).build()
         }
     }
@@ -103,7 +103,7 @@ class NotificationRepository @Inject constructor(
 
     suspend fun setNotification(chatId: Long, state: Boolean) {
         context.notificationDataStore.updateData { data ->
-            val newGroup = NotificationPreferneces.newBuilder().setIsMuted(state).build()
+            val newGroup = NotificationPreferneces.newBuilder().setIsEnabled(state).build()
             data.toBuilder().removeGroups(chatId).putGroups(chatId, newGroup).build()
         }
     }

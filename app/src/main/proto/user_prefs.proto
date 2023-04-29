@@ -8,7 +8,7 @@ message UserPreferences {
 }
 
 message NotificationPreferneces {
-  bool is_muted = 1;
+  bool is_enabled = 1;
 }
 
 message NotificationGroup {
