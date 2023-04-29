@@ -94,7 +94,7 @@ fun ChatScaffold(
         }
     }
 
-    if (listState.centerItemIndex > 0) {
+    if (listState.centerItemIndex > 0 && messageIds.size > listState.centerItemIndex - 1) {
         viewModel.markAsRead(chatId, messageIds[listState.centerItemIndex - 1])
     }
 
