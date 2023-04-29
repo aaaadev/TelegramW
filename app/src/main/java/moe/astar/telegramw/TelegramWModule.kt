@@ -21,8 +21,8 @@ object TelegramWModule {
     fun provideTdlibParameters(@ApplicationContext context: Context): TdApi.SetTdlibParameters {
         return TdApi.SetTdlibParameters().apply {
             // Obtain application identifier hash for Telegram API access at https://my.telegram.org
-            apiId = context.resources.getInteger(R.integer.api_id)
-            apiHash = context.getString(R.string.api_hash)
+            apiId = BuildConfig.TELEGRAM_API_ID.toInt()
+            apiHash = BuildConfig.TELEGRAM_API_HASH
             useMessageDatabase = true
             useSecretChats = true
             systemLanguageCode = Locale.getDefault().language

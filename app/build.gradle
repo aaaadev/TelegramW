@@ -11,6 +11,11 @@ android {
     compileSdk 33
 
     defaultConfig {
+        Properties properties = new Properties()
+        properties.load(project.rootProject.file('local.properties').newDataInputStream())
+
+        buildConfigField "String", "TELEGRAM_API_ID", "\"${properties.getProperty('TELEGRAM_API_ID')}\""
+        buildConfigField "String", "TELEGRAM_API_HASH", "\"${properties.getProperty('TELEGRAM_API_HASH')}\""
         applicationId "moe.astar.telegramw"
         minSdk 28
         targetSdk 33

@@ -7,22 +7,22 @@ as many features are still either missing or unstable.
 
 Fully or partially implemented features include:
 - Login (with either a phone number + authentication code, or QR code)
-- View private and group chats
+- View private and group chats (including forum topics)
 - View user and group information
 - Send text messages
 - View image, video, animation, location, and sticker messages
 - Listen to audio messages
-- Notifications
+- Notifications (can be toggled group by group)
+- Reactions
 
 Missing (for now) features include:
 - Send audio, sticker, and location messages
-- Reactions
 
 ## Building
 
 Building should work on at least Android Studio 2022.1.1 Canary 9.
 
-Remember to replace the Telegram API access details in `app/src/main/res/values/api.xml`
+You should enter your Telegram API access details in `local.properties` with keys `TELEGRAM_API_ID`, `TELEGRAM_API_HASH`.
 if you intend to use the app for more than just testing or development.
 
 ## Known issues
