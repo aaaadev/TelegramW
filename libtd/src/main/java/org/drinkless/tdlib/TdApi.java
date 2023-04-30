@@ -306,6 +306,7 @@ public class TdApi {
             GetMapThumbnailFile.CONSTRUCTOR,
             GetMarkdownText.CONSTRUCTOR,
             GetMe.CONSTRUCTOR,
+            GetMemoryStatistics.CONSTRUCTOR,
             GetMenuButton.CONSTRUCTOR,
             GetMessage.CONSTRUCTOR,
             GetMessageAddedReactions.CONSTRUCTOR,
@@ -685,6 +686,134 @@ public class TdApi {
          * @return a string representation of the object.
          */
         public native String toString();
+    }
+
+    /**
+     * Access hash.
+     */
+    public static class AccessHash extends Object {
+        /**
+         * Chat identifier.
+         */
+        public long chatId;
+        /**
+         * Access hash type.
+         */
+        public AccessHashType type;
+        /**
+         * Access hash.
+         */
+        public long accessHash;
+
+        /**
+         * Access hash.
+         */
+        public AccessHash() {
+        }
+
+        /**
+         * Access hash.
+         *
+         * @param chatId Chat identifier.
+         * @param type Access hash type.
+         * @param accessHash Access hash.
+         */
+        public AccessHash(long chatId, AccessHashType type, long accessHash) {
+            this.chatId = chatId;
+            this.type = type;
+            this.accessHash = accessHash;
+        }
+
+        /**
+         * Identifier uniquely determining type of the object.
+         */
+        public static final int CONSTRUCTOR = -1984003302;
+
+        /**
+         * @return this.CONSTRUCTOR
+         */
+        @Override
+        public int getConstructor() {
+            return CONSTRUCTOR;
+        }
+    }
+
+    /**
+     * This class is an abstract base class.
+     * Represents the type of an access hash. The following types are possible: user, channel.
+     */
+    public abstract static class AccessHashType extends Object {
+        /**
+         * Describes possible values returned by getConstructor().
+         */
+        @Retention(RetentionPolicy.SOURCE)
+        @IntDef({
+            AccessHashTypeUser.CONSTRUCTOR,
+            AccessHashTypeChannel.CONSTRUCTOR
+        })
+        public @interface Constructors {}
+
+        /**
+         * @return identifier uniquely determining type of the object.
+         */
+        @Constructors
+        @Override
+        public abstract int getConstructor();
+        /**
+         * Default class constructor.
+         */
+        public AccessHashType() {
+        }
+    }
+
+    /**
+     * An access hash of an user.
+     */
+    public static class AccessHashTypeUser extends AccessHashType {
+
+        /**
+         * An access hash of an user.
+         */
+        public AccessHashTypeUser() {
+        }
+
+        /**
+         * Identifier uniquely determining type of the object.
+         */
+        public static final int CONSTRUCTOR = 989783425;
+
+        /**
+         * @return this.CONSTRUCTOR
+         */
+        @Override
+        public int getConstructor() {
+            return CONSTRUCTOR;
+        }
+    }
+
+    /**
+     * An access hash of a channel.
+     */
+    public static class AccessHashTypeChannel extends AccessHashType {
+
+        /**
+         * An access hash of a channel.
+         */
+        public AccessHashTypeChannel() {
+        }
+
+        /**
+         * Identifier uniquely determining type of the object.
+         */
+        public static final int CONSTRUCTOR = 369077840;
+
+        /**
+         * @return this.CONSTRUCTOR
+         */
+        @Override
+        public int getConstructor() {
+            return CONSTRUCTOR;
+        }
     }
 
     /**
@@ -26129,6 +26258,44 @@ public class TdApi {
     }
 
     /**
+     * Contains memory statistics.
+     */
+    public static class MemoryStatistics extends Object {
+        /**
+         * Memory statistics in an unspecified human-readable format.
+         */
+        public String statistics;
+
+        /**
+         * Contains memory statistics.
+         */
+        public MemoryStatistics() {
+        }
+
+        /**
+         * Contains memory statistics.
+         *
+         * @param statistics Memory statistics in an unspecified human-readable format.
+         */
+        public MemoryStatistics(String statistics) {
+            this.statistics = statistics;
+        }
+
+        /**
+         * Identifier uniquely determining type of the object.
+         */
+        public static final int CONSTRUCTOR = -1925890898;
+
+        /**
+         * @return this.CONSTRUCTOR
+         */
+        @Override
+        public int getConstructor() {
+            return CONSTRUCTOR;
+        }
+    }
+
+    /**
      * Describes a message.
      */
     public static class Message extends Object {
@@ -47904,6 +48071,7 @@ public class TdApi {
             UpdateChatAction.CONSTRUCTOR,
             UpdateUserStatus.CONSTRUCTOR,
             UpdateUser.CONSTRUCTOR,
+            UpdateAccessHash.CONSTRUCTOR,
             UpdateBasicGroup.CONSTRUCTOR,
             UpdateSupergroup.CONSTRUCTOR,
             UpdateSecretChat.CONSTRUCTOR,
@@ -50363,6 +50531,44 @@ public class TdApi {
          * Identifier uniquely determining type of the object.
          */
         public static final int CONSTRUCTOR = 1183394041;
+
+        /**
+         * @return this.CONSTRUCTOR
+         */
+        @Override
+        public int getConstructor() {
+            return CONSTRUCTOR;
+        }
+    }
+
+    /**
+     * Some data of a user or a chat has changed. This update is guaranteed to come before the user or chat identifier is returned to the application.
+     */
+    public static class UpdateAccessHash extends Update {
+        /**
+         * Access hash.
+         */
+        public AccessHash accessHash;
+
+        /**
+         * Some data of a user or a chat has changed. This update is guaranteed to come before the user or chat identifier is returned to the application.
+         */
+        public UpdateAccessHash() {
+        }
+
+        /**
+         * Some data of a user or a chat has changed. This update is guaranteed to come before the user or chat identifier is returned to the application.
+         *
+         * @param accessHash Access hash.
+         */
+        public UpdateAccessHash(AccessHash accessHash) {
+            this.accessHash = accessHash;
+        }
+
+        /**
+         * Identifier uniquely determining type of the object.
+         */
+        public static final int CONSTRUCTOR = 1982152027;
 
         /**
          * @return this.CONSTRUCTOR
@@ -67120,6 +67326,50 @@ public class TdApi {
     }
 
     /**
+     * Returns memory statistics.
+     *
+     * <p> Returns {@link MemoryStatistics MemoryStatistics} </p>
+     */
+    public static class GetMemoryStatistics extends Function<MemoryStatistics> {
+        /**
+         * Full memory statistics calculation.
+         */
+        public boolean full;
+
+        /**
+         * Default constructor for a function, which returns memory statistics.
+         *
+         * <p> Returns {@link MemoryStatistics MemoryStatistics} </p>
+         */
+        public GetMemoryStatistics() {
+        }
+
+        /**
+         * Creates a function, which returns memory statistics.
+         *
+         * <p> Returns {@link MemoryStatistics MemoryStatistics} </p>
+         *
+         * @param full Full memory statistics calculation.
+         */
+        public GetMemoryStatistics(boolean full) {
+            this.full = full;
+        }
+
+        /**
+         * Identifier uniquely determining type of the object.
+         */
+        public static final int CONSTRUCTOR = -2099228941;
+
+        /**
+         * @return this.CONSTRUCTOR
+         */
+        @Override
+        public int getConstructor() {
+            return CONSTRUCTOR;
+        }
+    }
+
+    /**
      * Returns menu button set by the bot for the given user; for bots only.
      *
      * <p> Returns {@link BotMenuButton BotMenuButton} </p>
@@ -77580,7 +77830,7 @@ public class TdApi {
          */
         public long botUserId;
         /**
-         * A two-letter ISO 639-1 language code. If empty, the description will be shown to all users, for which language there are no dedicated description.
+         * A two-letter ISO 639-1 language code. If empty, the description will be shown to all users for whose languages there is no dedicated description.
          */
         public String languageCode;
         /**
@@ -77602,7 +77852,7 @@ public class TdApi {
          * <p> Returns {@link Ok Ok} </p>
          *
          * @param botUserId Identifier of the target bot.
-         * @param languageCode A two-letter ISO 639-1 language code. If empty, the description will be shown to all users, for which language there are no dedicated description.
+         * @param languageCode A two-letter ISO 639-1 language code. If empty, the description will be shown to all users for whose languages there is no dedicated description.
          * @param description New bot&#039;s description on the specified language.
          */
         public SetBotInfoDescription(long botUserId, String languageCode, String description) {
@@ -77636,7 +77886,7 @@ public class TdApi {
          */
         public long botUserId;
         /**
-         * A two-letter ISO 639-1 language code. If empty, the short description will be shown to all users, for which language there are no dedicated description.
+         * A two-letter ISO 639-1 language code. If empty, the short description will be shown to all users for whose languages there is no dedicated description.
          */
         public String languageCode;
         /**
@@ -77658,7 +77908,7 @@ public class TdApi {
          * <p> Returns {@link Ok Ok} </p>
          *
          * @param botUserId Identifier of the target bot.
-         * @param languageCode A two-letter ISO 639-1 language code. If empty, the short description will be shown to all users, for which language there are no dedicated description.
+         * @param languageCode A two-letter ISO 639-1 language code. If empty, the short description will be shown to all users for whose languages there is no dedicated description.
          * @param shortDescription New bot&#039;s short description on the specified language.
          */
         public SetBotInfoShortDescription(long botUserId, String languageCode, String shortDescription) {
@@ -77692,7 +77942,7 @@ public class TdApi {
          */
         public long botUserId;
         /**
-         * A two-letter ISO 639-1 language code. If empty, the description will be shown to all users, for which language there are no dedicated description.
+         * A two-letter ISO 639-1 language code. If empty, the name will be shown to all users for whose languages there is no dedicated name.
          */
         public String languageCode;
         /**
@@ -77714,7 +77964,7 @@ public class TdApi {
          * <p> Returns {@link Ok Ok} </p>
          *
          * @param botUserId Identifier of the target bot.
-         * @param languageCode A two-letter ISO 639-1 language code. If empty, the description will be shown to all users, for which language there are no dedicated description.
+         * @param languageCode A two-letter ISO 639-1 language code. If empty, the name will be shown to all users for whose languages there is no dedicated name.
          * @param name New bot&#039;s name on the specified language; 0-64 characters; must be non-empty if language code is empty.
          */
         public SetBotName(long botUserId, String languageCode, String name) {

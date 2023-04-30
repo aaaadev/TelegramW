@@ -75,6 +75,12 @@ class TelegramClient @Inject constructor(private val parameters: TdApi.SetTdlibP
 
     init {
         client = Client.create(resultHandler, null, null)
+        client.send(TdApi.SetOption("ignore_inline_thumbnails", TdApi.OptionValueBoolean(true)), resultHandler)
+        client.send(TdApi.SetOption("disable_top_chats", TdApi.OptionValueBoolean(true)), resultHandler)
+        client.send(TdApi.SetOption("ignore_platform_restrictions", TdApi.OptionValueBoolean(true)), resultHandler)
+        client.send(TdApi.SetOption("ignore_sensitive_content_restrictions", TdApi.OptionValueBoolean(true)), resultHandler)
+        client.send(TdApi.SetOption("disable_document_filenames", TdApi.OptionValueBoolean(true)), resultHandler)
+        client.send(TdApi.SetOption("disable_auto_download", TdApi.OptionValueBoolean(true)), resultHandler)
         client.send(TdApi.SetLogVerbosityLevel(0), resultHandler)
     }
 

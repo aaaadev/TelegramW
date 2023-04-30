@@ -46,7 +46,7 @@ fun AboutScreen(
         item {
             TitleCard(
                 onClick = {},
-                title = { Text("TDLib") },
+                title = { Text("TDLight") },
                 contentColor = MaterialTheme.colors.onSurface,
                 titleColor = MaterialTheme.colors.onSurface
             ) {
