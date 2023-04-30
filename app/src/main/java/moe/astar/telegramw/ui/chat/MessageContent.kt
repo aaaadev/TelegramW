@@ -1119,9 +1119,9 @@ fun ChatAddMembersMessage(
         senderId?.also { senderIdValue ->
             viewModel.getUser(senderIdValue)?.also { sender ->
                 if (userIds.size > 1) {
-                    Text("$users were added by ${sender.firstName + " " + sender.lastName} to the group", modifier = Modifier.padding(bottom = 4.dp), style = MaterialTheme.typography.caption1.copy(textAlign = TextAlign.Center))
+                    Text("$users were added by ${sender.firstName + " " + sender.lastName} to the group", modifier = Modifier.padding(bottom = 4.dp).align(Alignment.Center), style = MaterialTheme.typography.caption1.copy(textAlign = TextAlign.Center))
                 } else {
-                    Text("$users was added by ${sender.firstName + " " + sender.lastName} to the group", modifier = Modifier.padding(bottom = 4.dp), style = MaterialTheme.typography.caption1.copy(textAlign = TextAlign.Center))
+                    Text("$users was added by ${sender.firstName + " " + sender.lastName} to the group", modifier = Modifier.padding(bottom = 4.dp).align(Alignment.Center), style = MaterialTheme.typography.caption1.copy(textAlign = TextAlign.Center))
                 }
             }
         }
@@ -1144,7 +1144,7 @@ fun ChatDeleteMemberMessage(
             viewModel.getUser(senderIdValue)?.also { sender ->
                 val user =
                     viewModel.getUser(userId)?.let { it.firstName + " " + it.lastName } ?: String()
-                Text("$user was deleted by ${sender.firstName + " " + sender.lastName} to the group", modifier = Modifier.padding(bottom = 4.dp), style = MaterialTheme.typography.caption1.copy(textAlign = TextAlign.Center))
+                Text("$user was deleted by ${sender.firstName + " " + sender.lastName} to the group", modifier = Modifier.padding(bottom = 4.dp).align(Alignment.Center), style = MaterialTheme.typography.caption1.copy(textAlign = TextAlign.Center))
             }
         }
     }
@@ -1163,7 +1163,7 @@ fun ChatJoinByLinkMessage(
         val senderId = (message.senderId as? TdApi.MessageSenderUser)?.userId
         senderId?.also { senderIdValue ->
             viewModel.getUser(senderIdValue)?.also { sender ->
-                Text("${sender.firstName + " " + sender.lastName} joined group via an invite link", modifier = Modifier.padding(bottom = 4.dp), style = MaterialTheme.typography.caption1.copy(textAlign = TextAlign.Center))
+                Text("${sender.firstName + " " + sender.lastName} joined group via an invite link", modifier = Modifier.padding(bottom = 4.dp).align(Alignment.Center), style = MaterialTheme.typography.caption1.copy(textAlign = TextAlign.Center))
             }
         }
     }
@@ -1182,7 +1182,7 @@ fun ChatJoinByRequestMessage(
         val senderId = (message.senderId as? TdApi.MessageSenderUser)?.userId
         senderId?.also { senderIdValue ->
             viewModel.getUser(senderIdValue)?.also { sender ->
-                Text("${sender.firstName + " " + sender.lastName} joined chat by request", modifier = Modifier.padding(bottom = 4.dp), style = MaterialTheme.typography.caption1.copy(textAlign = TextAlign.Center))
+                Text("${sender.firstName + " " + sender.lastName} joined chat by request", modifier = Modifier.padding(bottom = 4.dp).align(Alignment.Center), style = MaterialTheme.typography.caption1.copy(textAlign = TextAlign.Center))
             }
         }
     }
@@ -1202,7 +1202,7 @@ fun ChatChangeTitleMessage(
         val senderId = (message.senderId as? TdApi.MessageSenderUser)?.userId
         senderId?.also { senderIdValue ->
             viewModel.getUser(senderIdValue)?.also { sender ->
-                Text("${sender.firstName + " " + sender.lastName} changed group's title to $title", modifier = Modifier.padding(bottom = 4.dp),style = MaterialTheme.typography.caption1.copy(textAlign = TextAlign.Center))
+                Text("${sender.firstName + " " + sender.lastName} changed group's title to $title", modifier = Modifier.padding(bottom = 4.dp).align(Alignment.Center),style = MaterialTheme.typography.caption1.copy(textAlign = TextAlign.Center))
             }
         }
     }
@@ -1221,7 +1221,7 @@ fun ChatDeletePhotoMessage(
         val senderId = (message.senderId as? TdApi.MessageSenderUser)?.userId
         senderId?.also { senderIdValue ->
             viewModel.getUser(senderIdValue)?.also { sender ->
-                Text("${sender.firstName + " " + sender.lastName} deleted group's photo", modifier = Modifier.padding(bottom = 4.dp), style = MaterialTheme.typography.caption1.copy(textAlign = TextAlign.Center))
+                Text("${sender.firstName + " " + sender.lastName} deleted group's photo", modifier = Modifier.padding(bottom = 4.dp).align(Alignment.Center), style = MaterialTheme.typography.caption1.copy(textAlign = TextAlign.Center))
             }
         }
     }
@@ -1240,7 +1240,7 @@ fun ChatChangePhotoMessage(
         val senderId = (message.senderId as? TdApi.MessageSenderUser)?.userId
         senderId?.also { senderIdValue ->
             viewModel.getUser(senderIdValue)?.also { sender ->
-                Text("${sender.firstName + " " + sender.lastName} changed group's photo", modifier = Modifier.padding(bottom = 4.dp), style = MaterialTheme.typography.caption1.copy(textAlign = TextAlign.Center))
+                Text("${sender.firstName + " " + sender.lastName} changed group's photo", modifier = Modifier.padding(bottom = 4.dp).align(Alignment.Center), style = MaterialTheme.typography.caption1.copy(textAlign = TextAlign.Center))
             }
         }
     }
