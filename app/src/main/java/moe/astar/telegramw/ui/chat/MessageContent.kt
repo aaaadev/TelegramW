@@ -1199,7 +1199,7 @@ fun PinMessage(
                 append("message")
                 pop()
         })
-        ClickableText(text = msg, style = MaterialTheme.typography.caption1, onClick = { offset ->
+        ClickableText(text = msg, style = MaterialTheme.typography.body1, onClick = { offset ->
             msg.getStringAnnotations(tag = "msg", start = offset, end = offset).firstOrNull()?.let {
                 scrollReply(content.messageId)
             }
