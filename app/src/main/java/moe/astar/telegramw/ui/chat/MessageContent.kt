@@ -1187,22 +1187,18 @@ fun PinMessage(
                     append("message")
                     pop()
                 }
-            } ?: {
-                buildAnnotatedString {
-                    append("Channel pinned ")
-                    pushStringAnnotation(tag = "msg", annotation = String())
-                    append("message")
-                    pop()
-                }
-            }
-        } ?: {
-            buildAnnotatedString {
+            } ?: buildAnnotatedString {
                 append("Channel pinned ")
                 pushStringAnnotation(tag = "msg", annotation = String())
                 append("message")
                 pop()
             }
-        }) as AnnotatedString
+        } ?: buildAnnotatedString {
+                append("Channel pinned ")
+                pushStringAnnotation(tag = "msg", annotation = String())
+                append("message")
+                pop()
+        })
         ClickableText(text = msg, onClick = { offset ->
             msg.getStringAnnotations(tag = "msg", start = offset, end = offset).firstOrNull()?.let {
                 scrollReply(content.messageId)
