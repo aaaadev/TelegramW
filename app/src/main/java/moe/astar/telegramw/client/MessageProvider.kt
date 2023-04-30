@@ -50,7 +50,11 @@ class MessageProvider @Inject constructor(
             .onEach {
                 if (_messageData.value.contains(it.oldMessageId)) {
                     _messageIds.value = _messageIds.value.mutate { list ->
-                        list[_messageIds.value.indexOf(it.oldMessageId)] = it.message.id
+                        if (_messageIds.value.contains(it.oldMessageId)) {
+                            list[_messageIds.value.indexOf(it.oldMessageId)] = it.message.id
+                        } else {
+                            _messageIds.value = _messageIds.value.add(0, it.message.id)
+                        }
                     }
                     _messageData.value = _messageData.value.remove(it.oldMessageId)
                     _messageData.value = _messageData.value.put(it.message.id, it.message)
