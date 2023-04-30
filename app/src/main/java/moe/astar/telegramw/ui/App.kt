@@ -11,6 +11,7 @@ import androidx.wear.compose.navigation.rememberSwipeDismissableNavController
 import moe.astar.telegramw.Screen
 import moe.astar.telegramw.UserPreferences
 import moe.astar.telegramw.theme.WeargramTheme
+import moe.astar.telegramw.ui.about.AboutScreen
 import moe.astar.telegramw.ui.chat.ChatScreen
 import moe.astar.telegramw.ui.home.HomeScreen
 import moe.astar.telegramw.ui.info.InfoScreen
@@ -150,6 +151,10 @@ private fun MainNavHost(navController: NavHostController) {
                     )
                 }
             }
+        }
+
+        composable(Screen.About.route) {
+            AboutScreen(navController, viewModel = hiltViewModel(it))
         }
     }
 }

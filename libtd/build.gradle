@@ -7,6 +7,7 @@
 apply plugin: 'com.android.library'
 
 android {
+    namespace 'org.drinkless.tdlib'
     compileSdkVersion 33
 
     sourceSets.main {

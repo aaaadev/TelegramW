@@ -38,8 +38,10 @@ class MessageProvider @Inject constructor(
             .filterIsInstance<TdApi.UpdateNewMessage>()
             .filter { it.message.chatId == chatId && (threadId == null || threadId == it.message.messageThreadId) }
             .onEach {
-                _messageData.value = _messageData.value.put(it.message.id, it.message)
-                _messageIds.value = _messageIds.value.add(0, it.message.id)
+                if (!_messageData.value.contains(it.message.id)) {
+                    _messageData.value = _messageData.value.put(it.message.id, it.message)
+                    _messageIds.value = _messageIds.value.add(0, it.message.id)
+                }
             }.launchIn(scope)
 
         client.updateFlow
@@ -51,8 +53,13 @@ class MessageProvider @Inject constructor(
                         list[_messageIds.value.indexOf(it.oldMessageId)] = it.message.id
                     }
                     _messageData.value = _messageData.value.remove(it.oldMessageId)
+                    _messageData.value = _messageData.value.put(it.message.id, it.message)
+                } else {
+                    if (!_messageData.value.contains(it.message.id)) {
+                        _messageData.value = _messageData.value.put(it.message.id, it.message)
+                        _messageIds.value = _messageIds.value.add(0, it.message.id)
+                    }
                 }
-                _messageData.value = _messageData.value.put(it.message.id, it.message)
             }.launchIn(scope)
 
         client.updateFlow

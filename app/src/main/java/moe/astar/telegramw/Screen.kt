@@ -87,5 +87,9 @@ sealed class Screen(val route: String) {
     object Settings : Screen("settings") {
         fun buildRoute(): String = "settings"
     }
+
+    object About : Screen("about") {
+        fun buildRoute(): String = "about"
+    }
     //object CreateChat : Screen("createChat")
 }

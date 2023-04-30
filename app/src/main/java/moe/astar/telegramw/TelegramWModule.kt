@@ -1,7 +1,9 @@
 package moe.astar.telegramw
 
 import android.content.Context
+import android.content.pm.PackageManager
 import android.os.Build
+import androidx.compose.ui.platform.LocalContext
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -19,6 +21,8 @@ import javax.inject.Singleton
 object TelegramWModule {
     @Provides
     fun provideTdlibParameters(@ApplicationContext context: Context): TdApi.SetTdlibParameters {
+        val manager = context.packageManager
+        val tgwInfo = manager.getPackageInfo(context.packageName, PackageManager.GET_ACTIVITIES)
         return TdApi.SetTdlibParameters().apply {
             // Obtain application identifier hash for Telegram API access at https://my.telegram.org
             apiId = BuildConfig.TELEGRAM_API_ID.toInt()
@@ -29,7 +33,7 @@ object TelegramWModule {
             databaseDirectory = context.filesDir.absolutePath
             deviceModel = Build.MODEL
             systemVersion = Build.VERSION.RELEASE
-            applicationVersion = "0.1"
+            applicationVersion = tgwInfo.versionName
             enableStorageOptimizer = true
         }
     }
