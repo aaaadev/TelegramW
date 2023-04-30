@@ -135,6 +135,62 @@ fun MessageContent(
             onClick = onClick,
             scrollReply = scrollReply
         )
+        is TdApi.MessageChatAddMembers -> ChatAddMembersMessage(
+            message,
+            content,
+            viewModel,
+            modifier,
+            onClick = onClick,
+            scrollReply = scrollReply,
+        )
+        is TdApi.MessageChatDeleteMember -> ChatDeleteMemberMessage(
+            message,
+            content,
+            viewModel,
+            modifier,
+            onClick = onClick,
+            scrollReply = scrollReply,
+        )
+        is TdApi.MessageChatJoinByLink -> ChatJoinByLinkMessage(
+            message,
+            content,
+            viewModel,
+            modifier,
+            onClick = onClick,
+            scrollReply = scrollReply,
+        )
+        is TdApi.MessageChatJoinByRequest -> ChatJoinByRequestMessage(
+            message,
+            content,
+            viewModel,
+            modifier,
+            onClick = onClick,
+            scrollReply = scrollReply,
+        )
+        is TdApi.MessageChatChangeTitle -> ChatChangeTitleMessage(
+            message,
+            content,
+            viewModel,
+            modifier,
+            onClick = onClick,
+            scrollReply = scrollReply,
+        )
+        is TdApi.MessageChatDeletePhoto -> ChatDeletePhotoMessage(
+            message,
+            content,
+            viewModel,
+            modifier,
+            onClick = onClick,
+            scrollReply = scrollReply,
+        )
+        is TdApi.MessageChatChangePhoto -> ChatChangePhotoMessage(
+            message,
+            content,
+            viewModel,
+            modifier,
+            onClick = onClick,
+            scrollReply = scrollReply,
+        )
         else -> UnsupportedMessage(
             message,
             viewModel,
@@ -955,6 +1011,151 @@ fun ContactMessage(
         val name = content.contact.let { it.firstName + " " + it.lastName }
         val number = content.contact.phoneNumber
         Text("Contact:\n $name, $number")
+    }
+}
+
+@Composable
+fun ChatAddMembersMessage(
+    message: TdApi.Message,
+    content: TdApi.MessageChatAddMembers,
+    viewModel: ChatViewModel,
+    modifier: Modifier = Modifier,
+    scrollReply: (Long) -> Unit,
+    onClick: () -> Unit = {}
+) {
+    MessageCard(message, onClick = onClick, viewModel = viewModel, scrollReply = scrollReply) {
+        val userIds = content.memberUserIds
+        val users = userIds.joinToString(",") { userId ->
+            viewModel.getUser(userId)?.let { it.firstName + " " + it.lastName } ?: String()
+        }
+        val senderId = (message.senderId as? TdApi.MessageSenderUser)?.userId
+        senderId?.also { senderIdValue ->
+            viewModel.getUser(senderIdValue)?.also { sender ->
+                if (userIds.size > 1) {
+                    Text("$users were added by ${sender.firstName + " " + sender.lastName} to the chat")
+                } else {
+                    Text("$users was added by ${sender.firstName + " " + sender.lastName} to the chat")
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun ChatDeleteMemberMessage(
+    message: TdApi.Message,
+    content: TdApi.MessageChatDeleteMember,
+    viewModel: ChatViewModel,
+    modifier: Modifier = Modifier,
+    scrollReply: (Long) -> Unit,
+    onClick: () -> Unit = {}
+) {
+    MessageCard(message, onClick = onClick, viewModel = viewModel, scrollReply = scrollReply) {
+        val userId = content.userId
+        val senderId = (message.senderId as? TdApi.MessageSenderUser)?.userId
+        senderId?.also { senderIdValue ->
+            viewModel.getUser(senderIdValue)?.also { sender ->
+                val user =
+                    viewModel.getUser(userId)?.let { it.firstName + " " + it.lastName } ?: String()
+                Text("$user was deleted by ${sender.firstName + " " + sender.lastName}to the chat")
+            }
+        }
+    }
+}
+
+@Composable
+fun ChatJoinByLinkMessage(
+    message: TdApi.Message,
+    content: TdApi.MessageChatJoinByLink,
+    viewModel: ChatViewModel,
+    modifier: Modifier = Modifier,
+    scrollReply: (Long) -> Unit,
+    onClick: () -> Unit = {}
+) {
+    MessageCard(message, onClick = onClick, viewModel = viewModel, scrollReply = scrollReply) {
+        val senderId = (message.senderId as? TdApi.MessageSenderUser)?.userId
+        senderId?.also { senderIdValue ->
+            viewModel.getUser(senderIdValue)?.also { sender ->
+                Text("${sender.firstName + " " + sender.lastName} joined chat by link")
+            }
+        }
+    }
+}
+
+@Composable
+fun ChatJoinByRequestMessage(
+    message: TdApi.Message,
+    content: TdApi.MessageChatJoinByRequest,
+    viewModel: ChatViewModel,
+    modifier: Modifier = Modifier,
+    scrollReply: (Long) -> Unit,
+    onClick: () -> Unit = {}
+) {
+    MessageCard(message, onClick = onClick, viewModel = viewModel, scrollReply = scrollReply) {
+        val senderId = (message.senderId as? TdApi.MessageSenderUser)?.userId
+        senderId?.also { senderIdValue ->
+            viewModel.getUser(senderIdValue)?.also { sender ->
+                Text("${sender.firstName + " " + sender.lastName} joined chat by request")
+            }
+        }
+    }
+}
+
+@Composable
+fun ChatChangeTitleMessage(
+    message: TdApi.Message,
+    content: TdApi.MessageChatChangeTitle,
+    viewModel: ChatViewModel,
+    modifier: Modifier = Modifier,
+    scrollReply: (Long) -> Unit,
+    onClick: () -> Unit = {}
+) {
+    MessageCard(message, onClick = onClick, viewModel = viewModel, scrollReply = scrollReply) {
+        val title = content.title
+        val senderId = (message.senderId as? TdApi.MessageSenderUser)?.userId
+        senderId?.also { senderIdValue ->
+            viewModel.getUser(senderIdValue)?.also { sender ->
+                Text("${sender.firstName + " " + sender.lastName} changed group's title to $title")
+            }
+        }
+    }
+}
+
+@Composable
+fun ChatDeletePhotoMessage(
+    message: TdApi.Message,
+    content: TdApi.MessageChatDeletePhoto,
+    viewModel: ChatViewModel,
+    modifier: Modifier = Modifier,
+    scrollReply: (Long) -> Unit,
+    onClick: () -> Unit = {}
+) {
+    MessageCard(message, onClick = onClick, viewModel = viewModel, scrollReply = scrollReply) {
+        val senderId = (message.senderId as? TdApi.MessageSenderUser)?.userId
+        senderId?.also { senderIdValue ->
+            viewModel.getUser(senderIdValue)?.also { sender ->
+                Text("${sender.firstName + " " + sender.lastName} deleted group's photo")
+            }
+        }
+    }
+}
+
+@Composable
+fun ChatChangePhotoMessage(
+    message: TdApi.Message,
+    content: TdApi.MessageChatChangePhoto,
+    viewModel: ChatViewModel,
+    modifier: Modifier = Modifier,
+    scrollReply: (Long) -> Unit,
+    onClick: () -> Unit = {}
+) {
+    MessageCard(message, onClick = onClick, viewModel = viewModel, scrollReply = scrollReply) {
+        val senderId = (message.senderId as? TdApi.MessageSenderUser)?.userId
+        senderId?.also { senderIdValue ->
+            viewModel.getUser(senderIdValue)?.also { sender ->
+                Text("${sender.firstName + " " + sender.lastName} changed group's photo")
+            }
+        }
     }
 }
 
