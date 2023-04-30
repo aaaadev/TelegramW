@@ -35,7 +35,7 @@ class ChatViewModel @Inject constructor(
     val messageProvider: MessageProvider,
     @ApplicationContext context: Context
 ) : ViewModel() {
-
+    val readState = mutableSetOf<Long>()
     val chatState = mutableStateOf<ChatState>(ChatState.Loading)
 
     private val TAG = this::class.simpleName
