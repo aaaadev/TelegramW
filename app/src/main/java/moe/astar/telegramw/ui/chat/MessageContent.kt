@@ -21,6 +21,7 @@ import androidx.compose.ui.graphics.painter.ColorPainter
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontFamily
@@ -1178,21 +1179,35 @@ fun PinMessage(
 ) {
     MessageCard(message, onClick = onClick, viewModel = viewModel, scrollReply = scrollReply) {
         val senderId = (message.senderId as? TdApi.MessageSenderUser)?.userId
-        senderId?.also { senderIdValue ->
-            viewModel.getUser(senderIdValue)?.also { sender ->
-                val msg = buildAnnotatedString {
+        val msg: AnnotatedString = (senderId?.let { senderIdValue ->
+            viewModel.getUser(senderIdValue)?.let { sender ->
+                buildAnnotatedString {
                     append("${sender.firstName + " " + sender.lastName} pinned ")
                     pushStringAnnotation(tag = "msg", annotation = String())
                     append("message")
                     pop()
                 }
-                ClickableText(text = msg, onClick = { offset ->
-                    msg.getStringAnnotations(tag = "msg", start = offset, end = offset).firstOrNull()?.let {
-                        scrollReply(content.messageId)
-                    }
-                })
+            } ?: {
+                buildAnnotatedString {
+                    append("Channel pinned ")
+                    pushStringAnnotation(tag = "msg", annotation = String())
+                    append("message")
+                    pop()
+                }
             }
-        }
+        } ?: {
+            buildAnnotatedString {
+                append("Channel pinned ")
+                pushStringAnnotation(tag = "msg", annotation = String())
+                append("message")
+                pop()
+            }
+        }) as AnnotatedString
+        ClickableText(text = msg, onClick = { offset ->
+            msg.getStringAnnotations(tag = "msg", start = offset, end = offset).firstOrNull()?.let {
+                scrollReply(content.messageId)
+            }
+        })
     }
 }
 
