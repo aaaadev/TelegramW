@@ -5,6 +5,12 @@ plugins {
     id 'dagger.hilt.android.plugin'
     id "com.google.protobuf" version "0.8.17"
 }
+import org.apache.tools.ant.taskdefs.condition.Os
+
+def checkMac() {
+    return Os.isFamily(Os.FAMILY_MAC)
+}
+
 def getGitHash = { ->
     def stdout = new ByteArrayOutputStream()
     exec {
@@ -106,7 +112,11 @@ dependencies {
 
 protobuf {
     protoc {
-        artifact = "com.google.protobuf:protoc:3.14.0:osx-x86_64"
+        if (checkMac()) {
+            artifact = "com.google.protobuf:protoc:3.14.0:osx-x86_64"
+        } else {
+            artifact = "com.google.protobuf:protoc:3.14.0"
+        }
     }
 
     // Generates the java Protobuf-lite code for the Protobufs in this project. See
