@@ -261,7 +261,6 @@ fun MessageItem(
             } else null
         } else null
     }
-
     Column(
         modifier = Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally
     ) {
@@ -275,31 +274,13 @@ fun MessageItem(
                 modifier = Modifier.padding(bottom = 4.dp)
             )
         }
-        Box(modifier = Modifier.fillMaxWidth()) {
-            Sender(
-                sender,
-                viewModel,
-                navController,
-                modifier = Modifier
-                    .align(Alignment.CenterStart)
-                    .clickable {}
-            )
-        }
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .clickable {
-                    //navController.navigate(Screen.MessageMenu.buildRoute(chat.id, message.id))
-                },
-            contentAlignment = if (message.isOutgoing) Alignment.CenterEnd else Alignment.CenterStart,
-
-            ) {
-            Box(
-                modifier = Modifier.fillMaxWidth(0.85f)
-            ) {
-                MessageContent(message, viewModel, navController, scrollReply = scrollReply)
-            }
-        }
+                MessageContent(
+                    message,
+                    viewModel,
+                    navController,
+                    scrollReply = scrollReply,
+                    showSender = sender
+                )
     }
 }
 
