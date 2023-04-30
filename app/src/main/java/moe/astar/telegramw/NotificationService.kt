@@ -113,7 +113,7 @@ class NotificationService : Service() {
 
         val notification: Notification =
             NotificationCompat.Builder(this, FOREGROUND_NOTIFICATION_CHANNEL_ID)
-                .setBadgeIconType(R.drawable.ic_notification)
+                .setBadgeIconType(NotificationCompat.BADGE_ICON_NONE)
                 .setContentTitle("Telegram W")
                 .setContentText("Telegram W is running")
                 .setSmallIcon(R.drawable.ic_notification)

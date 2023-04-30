@@ -1,14 +1,13 @@
 package moe.astar.telegramw.client
 
-import android.app.Notification
-import android.app.NotificationChannel
-import android.app.NotificationManager
-import android.app.PendingIntent
+import android.Manifest
+import android.app.*
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
+import android.os.Build
 import android.util.Log
-import androidx.core.app.NotificationCompat
-import androidx.core.app.NotificationManagerCompat
+import androidx.core.app.*
 import androidx.core.app.Person
 import androidx.core.app.RemoteInput
 import androidx.core.graphics.drawable.IconCompat
@@ -292,7 +291,21 @@ class NotificationProvider @Inject constructor(
             .filter { it.totalCount > 0 }.map { Pair(it.id, buildNotification(it)) }
 
         NotificationManagerCompat.from(context).apply {
-            notifications.forEach { notify(it.first, it.second) }
+            if (ActivityCompat.checkSelfPermission(
+                    context,
+                    Manifest.permission.POST_NOTIFICATIONS
+                ) != PackageManager.PERMISSION_GRANTED
+            ) {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                    ActivityCompat.requestPermissions(
+                        context as Activity,
+                        arrayOf(Manifest.permission.POST_NOTIFICATIONS),
+                        0
+                    )
+                }
+            }
+            notifications.forEach {
+                notify(it.first, it.second) }
             notify(0, notification)
         }
 

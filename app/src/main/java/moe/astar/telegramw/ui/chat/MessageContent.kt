@@ -191,6 +191,14 @@ fun MessageContent(
             onClick = onClick,
             scrollReply = scrollReply,
         )
+        is TdApi.MessagePinMessage -> PinMessage(
+            message,
+            content,
+            viewModel,
+            modifier,
+            onClick = onClick,
+            scrollReply = scrollReply,
+        )
         else -> UnsupportedMessage(
             message,
             viewModel,
@@ -1154,6 +1162,35 @@ fun ChatChangePhotoMessage(
         senderId?.also { senderIdValue ->
             viewModel.getUser(senderIdValue)?.also { sender ->
                 Text("${sender.firstName + " " + sender.lastName} changed group's photo")
+            }
+        }
+    }
+}
+
+@Composable
+fun PinMessage(
+    message: TdApi.Message,
+    content: TdApi.MessagePinMessage,
+    viewModel: ChatViewModel,
+    modifier: Modifier = Modifier,
+    scrollReply: (Long) -> Unit,
+    onClick: () -> Unit = {}
+) {
+    MessageCard(message, onClick = onClick, viewModel = viewModel, scrollReply = scrollReply) {
+        val senderId = (message.senderId as? TdApi.MessageSenderUser)?.userId
+        senderId?.also { senderIdValue ->
+            viewModel.getUser(senderIdValue)?.also { sender ->
+                val msg = buildAnnotatedString {
+                    append("${sender.firstName + " " + sender.lastName} pinned ")
+                    pushStringAnnotation(tag = "msg", annotation = String())
+                    append("message")
+                    pop()
+                }
+                ClickableText(text = msg, onClick = { offset ->
+                    msg.getStringAnnotations(tag = "msg", start = offset, end = offset).firstOrNull()?.let {
+                        scrollReply(content.messageId)
+                    }
+                })
             }
         }
     }
