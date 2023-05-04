@@ -58,7 +58,10 @@ class NotificationProvider @Inject constructor(
                             it.chatId,
                             NotificationPreferneces.getDefaultInstance()
                         )
-                        Log.d("NotificationProvider", it.chatId.toString() + ": " + groupSetting.isEnabled.toString())
+                        Log.d(
+                            "NotificationProvider",
+                            it.chatId.toString() + ": " + groupSetting.isEnabled.toString()
+                        )
                         if (groupSetting.isEnabled) {
                             updateNotificationGroup(it)
                         }
@@ -305,7 +308,8 @@ class NotificationProvider @Inject constructor(
                 }
             }
             notifications.forEach {
-                notify(it.first, it.second) }
+                notify(it.first, it.second)
+            }
             notify(0, notification)
         }
 

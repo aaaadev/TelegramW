@@ -69,13 +69,34 @@ fun MessageContent(
             showSender = showSender,
         )
         is TdApi.MessagePhoto -> PhotoMessage(
-            message, content, viewModel, modifier, navController, onClick = onClick, scrollReply = scrollReply, showSender = showSender
+            message,
+            content,
+            viewModel,
+            modifier,
+            navController,
+            onClick = onClick,
+            scrollReply = scrollReply,
+            showSender = showSender
         )
         is TdApi.MessageAudio -> AudioMessage(
-            message, content, viewModel, modifier, navController, onClick = onClick, scrollReply = scrollReply, showSender =showSender
+            message,
+            content,
+            viewModel,
+            modifier,
+            navController,
+            onClick = onClick,
+            scrollReply = scrollReply,
+            showSender = showSender
         )
         is TdApi.MessageVoiceNote -> VoiceNoteMessage(
-            message, content, viewModel, modifier, navController, onClick = onClick, scrollReply = scrollReply, showSender = showSender
+            message,
+            content,
+            viewModel,
+            modifier,
+            navController,
+            onClick = onClick,
+            scrollReply = scrollReply,
+            showSender = showSender
         )
         is TdApi.MessageVideo -> VideoMessage(
             message,
@@ -98,10 +119,24 @@ fun MessageContent(
             showSender = showSender,
         )
         is TdApi.MessageSticker -> StickerMessage(
-            message, content, viewModel, modifier, navController, onClick = onClick, scrollReply = scrollReply, showSender = showSender,
+            message,
+            content,
+            viewModel,
+            modifier,
+            navController,
+            onClick = onClick,
+            scrollReply = scrollReply,
+            showSender = showSender,
         )
         is TdApi.MessageDocument -> DocumentMessage(
-            message, content, viewModel, modifier, navController, onClick = onClick, scrollReply = scrollReply, showSender = showSender,
+            message,
+            content,
+            viewModel,
+            modifier,
+            navController,
+            onClick = onClick,
+            scrollReply = scrollReply,
+            showSender = showSender,
         )
         is TdApi.MessageLocation -> LocationMessage(
             message,
@@ -114,10 +149,24 @@ fun MessageContent(
             showSender = showSender,
         )
         is TdApi.MessageAnimatedEmoji -> AnimatedEmojiMessage(
-            message, content, viewModel, modifier, navController, onClick = onClick, scrollReply = scrollReply, showSender = showSender,
+            message,
+            content,
+            viewModel,
+            modifier,
+            navController,
+            onClick = onClick,
+            scrollReply = scrollReply,
+            showSender = showSender,
         )
         is TdApi.MessageAnimation -> AnimationMessage(
-            message, content, viewModel, modifier, navController, onClick = onClick, scrollReply = scrollReply, showSender = showSender,
+            message,
+            content,
+            viewModel,
+            modifier,
+            navController,
+            onClick = onClick,
+            scrollReply = scrollReply,
+            showSender = showSender,
         )
         is TdApi.MessageCall -> CallMessage(
             message,
@@ -490,7 +539,14 @@ fun TextMessage(
     onClick: () -> Unit = {},
     showSender: Long?,
 ) {
-    MessageCard(message, navController = navController, onClick = onClick, viewModel = viewModel, scrollReply = scrollReply, showSender = showSender) {
+    MessageCard(
+        message,
+        navController = navController,
+        onClick = onClick,
+        viewModel = viewModel,
+        scrollReply = scrollReply,
+        showSender = showSender
+    ) {
         Column(
             horizontalAlignment = Alignment.Start
         ) {
@@ -572,7 +628,14 @@ fun AudioMessage(
     val position = remember { mutableStateOf(0f) }
 
 
-    MessageCard(message, navController = navController, onClick = onClick, viewModel = viewModel, scrollReply = scrollReply, showSender = showSender) {
+    MessageCard(
+        message,
+        navController = navController,
+        onClick = onClick,
+        viewModel = viewModel,
+        scrollReply = scrollReply,
+        showSender = showSender
+    ) {
         Box(
             modifier = Modifier.fillMaxWidth(),
             contentAlignment = Alignment.Center
@@ -649,7 +712,14 @@ fun VoiceNoteMessage(
     val position = remember { mutableStateOf(0f) }
 
 
-    MessageCard(message, navController = navController, onClick = onClick, viewModel = viewModel, scrollReply = scrollReply, showSender = showSender) {
+    MessageCard(
+        message,
+        navController = navController,
+        onClick = onClick,
+        viewModel = viewModel,
+        scrollReply = scrollReply,
+        showSender = showSender
+    ) {
         Box(
             modifier = Modifier.fillMaxWidth(),
             contentAlignment = Alignment.Center
@@ -940,7 +1010,14 @@ fun DocumentMessage(
     onClick: () -> Unit = {},
     showSender: Long?,
 ) {
-    MessageCard(message, navController = navController, onClick = onClick, viewModel = viewModel, scrollReply = scrollReply, showSender = showSender) {
+    MessageCard(
+        message,
+        navController = navController,
+        onClick = onClick,
+        viewModel = viewModel,
+        scrollReply = scrollReply,
+        showSender = showSender
+    ) {
         Text("file: " + content.document.fileName)
     }
 }
@@ -1016,7 +1093,14 @@ fun AnimatedEmojiMessage(
     onClick: () -> Unit = {},
     showSender: Long?,
 ) {
-    MessageCard(message, navController = navController, onClick = onClick, viewModel = viewModel, scrollReply = scrollReply, showSender = showSender) {
+    MessageCard(
+        message,
+        navController = navController,
+        onClick = onClick,
+        viewModel = viewModel,
+        scrollReply = scrollReply,
+        showSender = showSender
+    ) {
         Text(content.emoji)
     }
 }
@@ -1062,7 +1146,14 @@ fun CallMessage(
     onClick: () -> Unit = {},
     showSender: Long?,
 ) {
-    MessageCard(message, navController = navController, onClick = onClick, viewModel = viewModel, scrollReply = scrollReply, showSender = showSender) {
+    MessageCard(
+        message,
+        navController = navController,
+        onClick = onClick,
+        viewModel = viewModel,
+        scrollReply = scrollReply,
+        showSender = showSender
+    ) {
         Text("Call")
     }
 }
@@ -1078,7 +1169,14 @@ fun PollMessage(
     onClick: () -> Unit = {},
     showSender: Long?,
 ) {
-    MessageCard(message, navController = navController, onClick = onClick, viewModel = viewModel, scrollReply = scrollReply, showSender = showSender) {
+    MessageCard(
+        message,
+        navController = navController,
+        onClick = onClick,
+        viewModel = viewModel,
+        scrollReply = scrollReply,
+        showSender = showSender
+    ) {
         Text("Poll")
     }
 }
@@ -1094,7 +1192,14 @@ fun ContactMessage(
     onClick: () -> Unit = {},
     showSender: Long?,
 ) {
-    MessageCard(message, navController = navController, onClick = onClick, viewModel = viewModel, scrollReply = scrollReply, showSender = showSender) {
+    MessageCard(
+        message,
+        navController = navController,
+        onClick = onClick,
+        viewModel = viewModel,
+        scrollReply = scrollReply,
+        showSender = showSender
+    ) {
         val name = content.contact.let { it.firstName + " " + it.lastName }
         val number = content.contact.phoneNumber
         Text("Contact:\n $name, $number")
@@ -1110,7 +1215,9 @@ fun ChatAddMembersMessage(
     scrollReply: (Long) -> Unit,
     onClick: () -> Unit = {}
 ) {
-    Box(modifier = Modifier.fillMaxWidth().clickable { onClick }) {
+    Box(modifier = Modifier
+        .fillMaxWidth()
+        .clickable { onClick }) {
         val userIds = content.memberUserIds
         val users = userIds.joinToString(",") { userId ->
             viewModel.getUser(userId)?.let { it.firstName + " " + it.lastName } ?: String()
@@ -1119,9 +1226,21 @@ fun ChatAddMembersMessage(
         senderId?.also { senderIdValue ->
             viewModel.getUser(senderIdValue)?.also { sender ->
                 if (userIds.size > 1) {
-                    Text("$users were added by ${sender.firstName + " " + sender.lastName} to the group", modifier = Modifier.padding(bottom = 4.dp).align(Alignment.Center), style = MaterialTheme.typography.caption1.copy(textAlign = TextAlign.Center))
+                    Text(
+                        "$users were added by ${sender.firstName + " " + sender.lastName} to the group",
+                        modifier = Modifier
+                            .padding(bottom = 4.dp)
+                            .align(Alignment.Center),
+                        style = MaterialTheme.typography.caption1.copy(textAlign = TextAlign.Center)
+                    )
                 } else {
-                    Text("$users was added by ${sender.firstName + " " + sender.lastName} to the group", modifier = Modifier.padding(bottom = 4.dp).align(Alignment.Center), style = MaterialTheme.typography.caption1.copy(textAlign = TextAlign.Center))
+                    Text(
+                        "$users was added by ${sender.firstName + " " + sender.lastName} to the group",
+                        modifier = Modifier
+                            .padding(bottom = 4.dp)
+                            .align(Alignment.Center),
+                        style = MaterialTheme.typography.caption1.copy(textAlign = TextAlign.Center)
+                    )
                 }
             }
         }
@@ -1137,14 +1256,22 @@ fun ChatDeleteMemberMessage(
     scrollReply: (Long) -> Unit,
     onClick: () -> Unit = {}
 ) {
-    Box(modifier = Modifier.fillMaxWidth().clickable { onClick }) {
+    Box(modifier = Modifier
+        .fillMaxWidth()
+        .clickable { onClick }) {
         val userId = content.userId
         val senderId = (message.senderId as? TdApi.MessageSenderUser)?.userId
         senderId?.also { senderIdValue ->
             viewModel.getUser(senderIdValue)?.also { sender ->
                 val user =
                     viewModel.getUser(userId)?.let { it.firstName + " " + it.lastName } ?: String()
-                Text("$user was deleted by ${sender.firstName + " " + sender.lastName} to the group", modifier = Modifier.padding(bottom = 4.dp).align(Alignment.Center), style = MaterialTheme.typography.caption1.copy(textAlign = TextAlign.Center))
+                Text(
+                    "$user was deleted by ${sender.firstName + " " + sender.lastName} to the group",
+                    modifier = Modifier
+                        .padding(bottom = 4.dp)
+                        .align(Alignment.Center),
+                    style = MaterialTheme.typography.caption1.copy(textAlign = TextAlign.Center)
+                )
             }
         }
     }
@@ -1159,11 +1286,19 @@ fun ChatJoinByLinkMessage(
     scrollReply: (Long) -> Unit,
     onClick: () -> Unit = {}
 ) {
-    Box(modifier = Modifier.fillMaxWidth().clickable { onClick }) {
+    Box(modifier = Modifier
+        .fillMaxWidth()
+        .clickable { onClick }) {
         val senderId = (message.senderId as? TdApi.MessageSenderUser)?.userId
         senderId?.also { senderIdValue ->
             viewModel.getUser(senderIdValue)?.also { sender ->
-                Text("${sender.firstName + " " + sender.lastName} joined group via an invite link", modifier = Modifier.padding(bottom = 4.dp).align(Alignment.Center), style = MaterialTheme.typography.caption1.copy(textAlign = TextAlign.Center))
+                Text(
+                    "${sender.firstName + " " + sender.lastName} joined group via an invite link",
+                    modifier = Modifier
+                        .padding(bottom = 4.dp)
+                        .align(Alignment.Center),
+                    style = MaterialTheme.typography.caption1.copy(textAlign = TextAlign.Center)
+                )
             }
         }
     }
@@ -1178,11 +1313,19 @@ fun ChatJoinByRequestMessage(
     scrollReply: (Long) -> Unit,
     onClick: () -> Unit = {}
 ) {
-    Box(modifier = Modifier.fillMaxWidth().clickable { onClick }) {
+    Box(modifier = Modifier
+        .fillMaxWidth()
+        .clickable { onClick }) {
         val senderId = (message.senderId as? TdApi.MessageSenderUser)?.userId
         senderId?.also { senderIdValue ->
             viewModel.getUser(senderIdValue)?.also { sender ->
-                Text("${sender.firstName + " " + sender.lastName} joined chat by request", modifier = Modifier.padding(bottom = 4.dp).align(Alignment.Center), style = MaterialTheme.typography.caption1.copy(textAlign = TextAlign.Center))
+                Text(
+                    "${sender.firstName + " " + sender.lastName} joined chat by request",
+                    modifier = Modifier
+                        .padding(bottom = 4.dp)
+                        .align(Alignment.Center),
+                    style = MaterialTheme.typography.caption1.copy(textAlign = TextAlign.Center)
+                )
             }
         }
     }
@@ -1197,12 +1340,20 @@ fun ChatChangeTitleMessage(
     scrollReply: (Long) -> Unit,
     onClick: () -> Unit = {}
 ) {
-    Box(modifier = Modifier.fillMaxWidth().clickable { onClick }) {
+    Box(modifier = Modifier
+        .fillMaxWidth()
+        .clickable { onClick }) {
         val title = content.title
         val senderId = (message.senderId as? TdApi.MessageSenderUser)?.userId
         senderId?.also { senderIdValue ->
             viewModel.getUser(senderIdValue)?.also { sender ->
-                Text("${sender.firstName + " " + sender.lastName} changed group's title to $title", modifier = Modifier.padding(bottom = 4.dp).align(Alignment.Center),style = MaterialTheme.typography.caption1.copy(textAlign = TextAlign.Center))
+                Text(
+                    "${sender.firstName + " " + sender.lastName} changed group's title to $title",
+                    modifier = Modifier
+                        .padding(bottom = 4.dp)
+                        .align(Alignment.Center),
+                    style = MaterialTheme.typography.caption1.copy(textAlign = TextAlign.Center)
+                )
             }
         }
     }
@@ -1217,11 +1368,19 @@ fun ChatDeletePhotoMessage(
     scrollReply: (Long) -> Unit,
     onClick: () -> Unit = {}
 ) {
-    Box(modifier = Modifier.fillMaxWidth().clickable { onClick }) {
+    Box(modifier = Modifier
+        .fillMaxWidth()
+        .clickable { onClick }) {
         val senderId = (message.senderId as? TdApi.MessageSenderUser)?.userId
         senderId?.also { senderIdValue ->
             viewModel.getUser(senderIdValue)?.also { sender ->
-                Text("${sender.firstName + " " + sender.lastName} deleted group's photo", modifier = Modifier.padding(bottom = 4.dp).align(Alignment.Center), style = MaterialTheme.typography.caption1.copy(textAlign = TextAlign.Center))
+                Text(
+                    "${sender.firstName + " " + sender.lastName} deleted group's photo",
+                    modifier = Modifier
+                        .padding(bottom = 4.dp)
+                        .align(Alignment.Center),
+                    style = MaterialTheme.typography.caption1.copy(textAlign = TextAlign.Center)
+                )
             }
         }
     }
@@ -1236,11 +1395,19 @@ fun ChatChangePhotoMessage(
     scrollReply: (Long) -> Unit,
     onClick: () -> Unit = {}
 ) {
-    Box(modifier = Modifier.fillMaxWidth().clickable { onClick }) {
+    Box(modifier = Modifier
+        .fillMaxWidth()
+        .clickable { onClick }) {
         val senderId = (message.senderId as? TdApi.MessageSenderUser)?.userId
         senderId?.also { senderIdValue ->
             viewModel.getUser(senderIdValue)?.also { sender ->
-                Text("${sender.firstName + " " + sender.lastName} changed group's photo", modifier = Modifier.padding(bottom = 4.dp).align(Alignment.Center), style = MaterialTheme.typography.caption1.copy(textAlign = TextAlign.Center))
+                Text(
+                    "${sender.firstName + " " + sender.lastName} changed group's photo",
+                    modifier = Modifier
+                        .padding(bottom = 4.dp)
+                        .align(Alignment.Center),
+                    style = MaterialTheme.typography.caption1.copy(textAlign = TextAlign.Center)
+                )
             }
         }
     }
@@ -1255,7 +1422,9 @@ fun PinMessage(
     scrollReply: (Long) -> Unit,
     onClick: () -> Unit = {}
 ) {
-    Box(modifier = Modifier.fillMaxWidth().clickable { onClick }) {
+    Box(modifier = Modifier
+        .fillMaxWidth()
+        .clickable { onClick }) {
         val senderId = (message.senderId as? TdApi.MessageSenderUser)?.userId
         val msg: AnnotatedString = (senderId?.let { senderIdValue ->
             viewModel.getUser(senderIdValue)?.let { sender ->
@@ -1272,17 +1441,23 @@ fun PinMessage(
                 pop()
             }
         } ?: buildAnnotatedString {
-                append("Channel pinned ")
-                pushStringAnnotation(tag = "msg", annotation = String())
-                append("message")
-                pop()
+            append("Channel pinned ")
+            pushStringAnnotation(tag = "msg", annotation = String())
+            append("message")
+            pop()
         })
-        ClickableText(text = msg, style = MaterialTheme.typography.caption1.copy(color = MaterialTheme.colors.onSurface).copy(textAlign = TextAlign.Center),
-            modifier = Modifier.padding(bottom = 4.dp).align(Alignment.Center), onClick = { offset ->
-            msg.getStringAnnotations(tag = "msg", start = offset, end = offset).firstOrNull()?.let {
-                scrollReply(content.messageId)
-            }
-        })
+        ClickableText(text = msg,
+            style = MaterialTheme.typography.caption1.copy(color = MaterialTheme.colors.onSurface)
+                .copy(textAlign = TextAlign.Center),
+            modifier = Modifier
+                .padding(bottom = 4.dp)
+                .align(Alignment.Center),
+            onClick = { offset ->
+                msg.getStringAnnotations(tag = "msg", start = offset, end = offset).firstOrNull()
+                    ?.let {
+                        scrollReply(content.messageId)
+                    }
+            })
     }
 }
 
@@ -1296,7 +1471,14 @@ fun UnsupportedMessage(
     scrollReply: (Long) -> Unit,
     showSender: Long?,
 ) {
-    MessageCard(message, navController = navController, onClick = onClick, viewModel = viewModel, scrollReply = scrollReply, showSender = showSender) {
+    MessageCard(
+        message,
+        navController = navController,
+        onClick = onClick,
+        viewModel = viewModel,
+        scrollReply = scrollReply,
+        showSender = showSender
+    ) {
         Text("Unsupported message")
     }
 }

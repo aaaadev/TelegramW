@@ -48,60 +48,73 @@ fun PhoneNumberScreen(viewModel: LoginViewModel, onEntry: (String) -> Unit) {
             }
         }
 
-    Column(
+    ScalingLazyColumn(
         modifier = Modifier.fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     )
     {
-        Text(
-            "Login options",
-            modifier = Modifier.padding(bottom = 8.dp)
-        )
-        Chip(
-            modifier = Modifier
-                .fillMaxWidth(0.9f)
-                .padding(4.dp),
-            onClick = { viewModel.requestQrCode() },
-            label = { Text("Scan QR code") },
-            icon = {
-                Icon(
-                    painter = painterResource(id = R.drawable.baseline_qr_code_24),
-                    contentDescription = null
-                )
-            },
-            colors = ChipDefaults.chipColors(backgroundColor = MaterialTheme.colors.surface)
-        )
+        item {
+            Text(
+                "Sign in",
+                modifier = Modifier.padding(bottom = 8.dp),
+                style = MaterialTheme.typography.title2
+            )
+        }
+        item {
+            Text(
+                "Send or view messages",
+                modifier = Modifier.padding(bottom = 8.dp),
+                style = MaterialTheme.typography.body1
+            )
+        }
+        item {
+            Chip(
+                modifier = Modifier
+                    .fillMaxWidth(0.9f)
+                    .padding(4.dp),
+                onClick = { viewModel.requestQrCode() },
+                label = { Text("Scan QR code") },
+                icon = {
+                    Icon(
+                        painter = painterResource(id = R.drawable.baseline_qr_code_24),
+                        contentDescription = null
+                    )
+                },
+                colors = ChipDefaults.chipColors(backgroundColor = MaterialTheme.colors.surface)
+            )
+        }
+        item {
+            Chip(
+                modifier = Modifier
+                    .fillMaxWidth(0.9f)
+                    .padding(4.dp),
+                onClick = {
+                    val intent: Intent = RemoteInputIntentHelper.createActionRemoteInputIntent()
+                    val remoteInputs: List<RemoteInput> = listOf(
+                        RemoteInput.Builder("input")
+                            .setLabel("")
+                            .wearableExtender {
+                                setEmojisAllowed(false)
+                                setInputActionType(EditorInfo.IME_ACTION_DONE)
+                            }.build()
+                    )
 
-        Chip(
-            modifier = Modifier
-                .fillMaxWidth(0.9f)
-                .padding(4.dp),
-            onClick = {
-                val intent: Intent = RemoteInputIntentHelper.createActionRemoteInputIntent()
-                val remoteInputs: List<RemoteInput> = listOf(
-                    RemoteInput.Builder("input")
-                        .setLabel("")
-                        .wearableExtender {
-                            setEmojisAllowed(false)
-                            setInputActionType(EditorInfo.IME_ACTION_DONE)
-                        }.build()
-                )
+                    RemoteInputIntentHelper.putRemoteInputsExtra(intent, remoteInputs)
 
-                RemoteInputIntentHelper.putRemoteInputsExtra(intent, remoteInputs)
+                    launcher.launch(intent)
 
-                launcher.launch(intent)
-
-            },
-            label = { Text("Enter phone number") },
-            icon = {
-                Icon(
-                    painter = painterResource(id = R.drawable.baseline_phone_24),
-                    contentDescription = null
-                )
-            },
-            colors = ChipDefaults.chipColors(backgroundColor = MaterialTheme.colors.surface)
-        )
+                },
+                label = { Text("Enter phone number") },
+                icon = {
+                    Icon(
+                        painter = painterResource(id = R.drawable.baseline_phone_24),
+                        contentDescription = null
+                    )
+                },
+                colors = ChipDefaults.chipColors(backgroundColor = MaterialTheme.colors.surface)
+            )
+        }
     }
 }
 

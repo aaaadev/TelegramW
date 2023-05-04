@@ -3,7 +3,6 @@ package moe.astar.telegramw
 import android.content.Context
 import android.content.pm.PackageManager
 import android.os.Build
-import androidx.compose.ui.platform.LocalContext
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn

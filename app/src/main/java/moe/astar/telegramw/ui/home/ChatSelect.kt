@@ -1,25 +1,16 @@
 package moe.astar.telegramw.ui.home
 
-import androidx.compose.animation.graphics.res.animatedVectorResource
-import androidx.compose.animation.graphics.res.rememberAnimatedVectorPainter
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
 import androidx.compose.foundation.focusable
 import androidx.compose.foundation.gestures.animateScrollBy
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.painter.ColorPainter
 import androidx.compose.ui.input.rotary.onRotaryScrollEvent
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -28,22 +19,30 @@ import androidx.wear.compose.material.*
 import androidx.wear.compose.material.dialog.Confirmation
 import androidx.wear.compose.material.dialog.Dialog
 import kotlinx.coroutines.launch
-import moe.astar.telegramw.R
 import moe.astar.telegramw.Screen
 import moe.astar.telegramw.ui.util.MessageStatusIcon
 import moe.astar.telegramw.ui.util.ShortDescription
 import org.drinkless.tdlib.TdApi
-import java.text.DateFormat
-import java.text.SimpleDateFormat
-import java.util.*
 
 @Composable
-fun ChatSelectScreen(navController: NavController, viewModel: ChatSelectViewModel, messageId: Long, fromChatId: Long, destId: Int) {
+fun ChatSelectScreen(
+    navController: NavController,
+    viewModel: ChatSelectViewModel,
+    messageId: Long,
+    fromChatId: Long,
+    destId: Int
+) {
     ChatSelectScaffold(navController, viewModel, messageId, fromChatId, destId)
 }
 
 @Composable
-fun ChatSelectScaffold(navController: NavController, viewModel: ChatSelectViewModel, messageId: Long, fromChatId: Long, destId: Int) {
+fun ChatSelectScaffold(
+    navController: NavController,
+    viewModel: ChatSelectViewModel,
+    messageId: Long,
+    fromChatId: Long,
+    destId: Int
+) {
     val listState = rememberScalingLazyListState()
     val coroutineScope = rememberCoroutineScope()
     val focusRequester = remember { FocusRequester() }
@@ -90,7 +89,14 @@ fun ChatSelectScaffold(navController: NavController, viewModel: ChatSelectViewMo
                                 viewModel.forwardMessageAsync(messageId, chatId, fromChatId)
                                 showSent = true
                             } else {
-                                navController.navigate(Screen.TopicSelect.buildRoute(chatId, messageId, fromChatId, destId))
+                                navController.navigate(
+                                    Screen.TopicSelect.buildRoute(
+                                        chatId,
+                                        messageId,
+                                        fromChatId,
+                                        destId
+                                    )
+                                )
                             }
                         },
                         viewModel
@@ -101,7 +107,8 @@ fun ChatSelectScaffold(navController: NavController, viewModel: ChatSelectViewMo
 
         Dialog(showDialog = showSent, onDismissRequest = {
             navController.popBackStack(destId, false, false)
-            showSent = false }) {
+            showSent = false
+        }) {
             Confirmation(
                 onTimeout = {
                     navController.popBackStack(destId, false, false)

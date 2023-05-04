@@ -4,7 +4,6 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.focusable
 import androidx.compose.foundation.gestures.animateScrollBy
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.layout.R
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.runtime.*
@@ -15,7 +14,6 @@ import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.ColorPainter
 import androidx.compose.ui.input.rotary.onRotaryScrollEvent
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -24,20 +22,32 @@ import androidx.wear.compose.material.*
 import androidx.wear.compose.material.dialog.Confirmation
 import androidx.wear.compose.material.dialog.Dialog
 import kotlinx.coroutines.launch
-import moe.astar.telegramw.Screen
-import moe.astar.telegramw.ui.util.MenuItem
 import moe.astar.telegramw.ui.util.TopicMessageStatusIcon
 import org.drinkless.tdlib.TdApi
 
 @Composable
-fun TopicSelectScreen(chatId: Long, navController: NavController, viewModel: TopicSelectViewModel, messageId: Long, fromChatId: Long, destId: Int) {
+fun TopicSelectScreen(
+    chatId: Long,
+    navController: NavController,
+    viewModel: TopicSelectViewModel,
+    messageId: Long,
+    fromChatId: Long,
+    destId: Int
+) {
     viewModel.initialize(chatId)
     TopicSelectScaffold(chatId, navController, viewModel, messageId, fromChatId, destId)
 }
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
-fun TopicSelectScaffold(chatId: Long, navController: NavController, viewModel: TopicSelectViewModel, messageId: Long, fromChatId: Long, destId: Int) {
+fun TopicSelectScaffold(
+    chatId: Long,
+    navController: NavController,
+    viewModel: TopicSelectViewModel,
+    messageId: Long,
+    fromChatId: Long,
+    destId: Int
+) {
     val listState = rememberScalingLazyListState()
     val coroutineScope = rememberCoroutineScope()
     val focusRequester = remember { FocusRequester() }
@@ -82,7 +92,12 @@ fun TopicSelectScaffold(chatId: Long, navController: NavController, viewModel: T
                         ChatItem(
                             it,
                             onClick = {
-                                viewModel.forwardMessageAsync(messageId, chatId, fromChatId, it.info.messageThreadId)
+                                viewModel.forwardMessageAsync(
+                                    messageId,
+                                    chatId,
+                                    fromChatId,
+                                    it.info.messageThreadId
+                                )
                                 showSent = true
                             },
                             viewModel
@@ -91,7 +106,12 @@ fun TopicSelectScaffold(chatId: Long, navController: NavController, viewModel: T
                         ChatItem(
                             it,
                             onClick = {
-                                viewModel.forwardMessageAsync(messageId, chatId, fromChatId, it.info.messageThreadId)
+                                viewModel.forwardMessageAsync(
+                                    messageId,
+                                    chatId,
+                                    fromChatId,
+                                    it.info.messageThreadId
+                                )
                                 showSent = true
                             },
                             viewModel
@@ -102,8 +122,10 @@ fun TopicSelectScaffold(chatId: Long, navController: NavController, viewModel: T
         }
     }
 
-    Dialog(showDialog = showSent, onDismissRequest = { navController.popBackStack(destId, false, false)
-        showSent = false }) {
+    Dialog(showDialog = showSent, onDismissRequest = {
+        navController.popBackStack(destId, false, false)
+        showSent = false
+    }) {
         Confirmation(
             onTimeout = {
                 navController.popBackStack(destId, false, false)

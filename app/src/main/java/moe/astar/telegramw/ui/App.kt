@@ -47,7 +47,6 @@ fun App(enableNotification: () -> Unit, disableNotification: () -> Unit) {
 @Composable
 private fun MainNavHost(navController: NavHostController) {
     SwipeDismissableNavHost(navController, startDestination = Screen.Home.route) {
-
         composable(Screen.Home.route) {
             HomeScreen(navController, hiltViewModel(it))
         }

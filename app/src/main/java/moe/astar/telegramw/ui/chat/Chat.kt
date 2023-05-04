@@ -93,7 +93,10 @@ fun ChatScaffold(
         }
     }
 
-    if (listState.centerItemIndex > 0 && messageIds.size > listState.centerItemIndex - 1 && !viewModel.readState.contains(messageIds[listState.centerItemIndex - 1])) {
+    if (listState.centerItemIndex > 0 && messageIds.size > listState.centerItemIndex - 1 && !viewModel.readState.contains(
+            messageIds[listState.centerItemIndex - 1]
+        )
+    ) {
         viewModel.markAsRead(chatId, messageIds[listState.centerItemIndex - 1])
         viewModel.readState.add(messageIds[listState.centerItemIndex - 1])
     }
@@ -277,13 +280,13 @@ fun MessageItem(
                 modifier = Modifier.padding(bottom = 4.dp)
             )
         }
-                MessageContent(
-                    message,
-                    viewModel,
-                    navController,
-                    scrollReply = scrollReply,
-                    showSender = sender
-                )
+        MessageContent(
+            message,
+            viewModel,
+            navController,
+            scrollReply = scrollReply,
+            showSender = sender
+        )
     }
 }
 

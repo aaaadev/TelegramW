@@ -54,9 +54,25 @@ class TopicSelectViewModel @Inject constructor(
         return client.sendRequest(TdApi.GetMessageThread(chatId, threadId)).filterIsInstance()
     }
 
-    fun forwardMessageAsync(messageId: Long, chatId: Long, fromChatId: Long, messageThreadId: Long) {
+    fun forwardMessageAsync(
+        messageId: Long,
+        chatId: Long,
+        fromChatId: Long,
+        messageThreadId: Long
+    ) {
         viewModelScope.launch {
-            client.sendUnscopedRequest(TdApi.ForwardMessages(chatId, messageThreadId, fromChatId, longArrayOf(messageId), TdApi.MessageSendOptions(), false, false, false))
+            client.sendUnscopedRequest(
+                TdApi.ForwardMessages(
+                    chatId,
+                    messageThreadId,
+                    fromChatId,
+                    longArrayOf(messageId),
+                    TdApi.MessageSendOptions(),
+                    false,
+                    false,
+                    false
+                )
+            )
         }
     }
 }

@@ -1,28 +1,36 @@
 package moe.astar.telegramw.ui.home
 
-import android.util.Log
-import androidx.compose.foundation.background
-import androidx.compose.foundation.focusable
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.foundation.*
 import androidx.compose.foundation.gestures.animateScrollBy
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.painter.ColorPainter
 import androidx.compose.ui.input.rotary.onRotaryScrollEvent
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.wear.compose.material.*
 import kotlinx.coroutines.launch
 import moe.astar.telegramw.R
 import moe.astar.telegramw.Screen
+import moe.astar.telegramw.ui.info.PlaceholderInfoImage
 import moe.astar.telegramw.ui.util.MessageStatusIcon
 import moe.astar.telegramw.ui.util.ShortDescription
 import org.drinkless.tdlib.TdApi
@@ -53,15 +61,11 @@ fun HomeScreen(navController: NavController, viewModel: HomeViewModel) {
     }
 }
 
-@OptIn(ExperimentalComposeUiApi::class)
+@OptIn(ExperimentalComposeUiApi::class, ExperimentalFoundationApi::class)
 @Composable
 fun HomeScaffold(navController: NavController, viewModel: HomeViewModel) {
-    val listState = rememberScalingLazyListState()
-    val coroutineScope = rememberCoroutineScope()
     val focusRequester = remember { FocusRequester() }
-    val chats by viewModel.chatProvider.chatIds.collectAsState()
-    val chatData by viewModel.chatProvider.chatData.collectAsState()
-    val forums by viewModel.chatProvider.threads.collectAsState()
+    val listState = rememberScalingLazyListState()
     //val forumData by viewModel.chatProvider.threadData.collectAsState()
 
     Scaffold(
@@ -76,6 +80,78 @@ fun HomeScaffold(navController: NavController, viewModel: HomeViewModel) {
         },
         vignette = { Vignette(vignettePosition = VignettePosition.TopAndBottom) }
     ) {
+        val maxPages = 2
+        var finalValue by remember { mutableStateOf(0) }
+        var state = rememberPagerState(0)
+
+        val animatedSelectedPage by animateFloatAsState(
+            targetValue = state.currentPage.toFloat(),
+        ) {
+            finalValue = it.toInt()
+        }
+
+        val pageIndicatorState: PageIndicatorState = remember {
+            object : PageIndicatorState {
+                override val pageOffset: Float
+                    get() = animatedSelectedPage - finalValue
+                override val selectedPage: Int
+                    get() = finalValue
+                override val pageCount: Int
+                    get() = maxPages
+            }
+        }
+        val shape = if (LocalConfiguration.current.isScreenRound) CircleShape else null
+        HorizontalPager(
+            pageCount = maxPages,
+            state = state,
+        ) { page ->
+            Box(
+                modifier = Modifier.fillMaxSize().run {
+                    if (shape != null) {
+                        clip(shape)
+                    } else {
+                        this
+                    }
+                }
+            ) {
+                when (page) {
+                    0 -> {
+                        ChatPage(listState, focusRequester, navController, viewModel)
+                    }
+                    1 -> {
+                        ContactsPage(
+                            navController = navController,
+                            viewModel = viewModel
+                        )
+                    }
+                }
+            }
+        }
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(6.dp)
+        ) {
+            HorizontalPageIndicator(
+                pageIndicatorState = pageIndicatorState,
+            )
+        }
+        LaunchedEffect(Unit) {
+            focusRequester.requestFocus()
+        }
+    }
+}
+
+@Composable
+fun ContactsPage(
+    navController: NavController,
+    viewModel: HomeViewModel
+) {
+    val focusRequester = remember { FocusRequester() }
+    val listState = rememberScalingLazyListState()
+    val coroutineScope = rememberCoroutineScope()
+    val contacts = remember { viewModel.getContact() }.collectAsState(initial = null)
+    contacts.value?.also { contactsValue ->
         ScalingLazyColumn(
             state = listState,
             modifier = Modifier
@@ -91,72 +167,186 @@ fun HomeScaffold(navController: NavController, viewModel: HomeViewModel) {
                 .wrapContentHeight(),
         ) {
             item {
-                Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.padding(bottom = 10.dp)) {
-                    Button(
-                        onClick = { navController.navigate(Screen.Info.buildRoute("user", viewModel.getMe()!!.id)) },
-                        colors = ButtonDefaults.buttonColors(
-                            backgroundColor = MaterialTheme.colors.primaryVariant,
-                            contentColor = MaterialTheme.colors.onSurface
-                        )
-                    ) {
-                        Icon(
-                            painterResource(id = R.drawable.baseline_person_24),
-                            contentDescription = null,
-                        )
-                    }
-                    Button(
-                        onClick = { navController.navigate(Screen.Settings.buildRoute()) },
-                        colors = ButtonDefaults.buttonColors(
-                            backgroundColor = MaterialTheme.colors.primaryVariant,
-                            contentColor = MaterialTheme.colors.onSurface
-                        )
-                    ) {
-                        Icon(
-                            painterResource(id = R.drawable.outline_settings_24),
-                            contentDescription = null,
-                        )
-                    }
-                }
+                Text(
+                    "Contacts",
+                    style = MaterialTheme.typography.title2,
+                    modifier = Modifier.padding(bottom = 8.dp)
+                )
             }
-            /*item {
-                CompactButton(
-                    onClick = { navController.navigate(Screen.MainMenu.route) },
-                    modifier = Modifier.padding(6.dp),
-                    colors = ButtonDefaults.buttonColors(backgroundColor = MaterialTheme.colors.surface)
+            items(contactsValue.userIds.toList()) {
+                UserItem(userId = it, viewModel = viewModel, navController = navController)
+            }
+        }
+    } ?: Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+        CircularProgressIndicator()
+    }
+}
+
+@Composable
+fun UserItem(userId: Long, viewModel: HomeViewModel, navController: NavController) {
+    val imageSize = 30.dp
+    viewModel.getUser(userId)?.also { user ->
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clickable {
+                    navController.navigate(Screen.Info.buildRoute("user", user.id))
+                }
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Spacer(modifier = Modifier.width(20.dp))
+                user.profilePhoto?.also {
+                    InfoImage(it.small, it.minithumbnail, viewModel, imageSize = imageSize)
+                } ?: run {
+                    PlaceholderInfoImage(
+                        painterResource(R.drawable.baseline_person_24),
+                        imageSize = imageSize
+                    )
+                }
+                Spacer(modifier = Modifier.width(10.dp))
+
+                Text(user.let { it.firstName + " " + it.lastName })
+
+            }
+
+        }
+
+    }
+
+}
+
+@Composable
+fun InfoImage(
+    photo: TdApi.File,
+    thumbnail: TdApi.Minithumbnail?,
+    viewModel: HomeViewModel,
+    imageSize: Dp = 120.dp
+) {
+
+    val thumbnailBitmap = remember {
+        thumbnail?.let {
+            val data = thumbnail.data
+            val aspectRatio = thumbnail.width.toFloat() / thumbnail.height.toFloat()
+            val bmp = BitmapFactory.decodeByteArray(data, 0, data.size)
+            Bitmap.createScaledBitmap(bmp, 400, (400 / aspectRatio).toInt(), true).asImageBitmap()
+        }
+    }
+
+    Box(
+        modifier = Modifier
+            .clip(CircleShape)
+    ) {
+
+        val imageModifier = Modifier
+            .clip(CircleShape)
+            .align(Alignment.Center)
+            .size(imageSize)
+
+        viewModel.fetchPhoto(photo).collectAsState(null).value?.also {
+            Image(it, null, modifier = imageModifier)
+        } ?: run {
+            thumbnailBitmap?.also {
+                Image(it, null, modifier = imageModifier)
+                CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+            }
+        }
+    }
+
+}
+
+@Composable
+fun ChatPage(
+    listState: ScalingLazyListState,
+    focusRequester: FocusRequester,
+    navController: NavController,
+    viewModel: HomeViewModel
+) {
+    val coroutineScope = rememberCoroutineScope()
+    val chats by viewModel.chatProvider.chatIds.collectAsState()
+    val chatData by viewModel.chatProvider.chatData.collectAsState()
+    val forums by viewModel.chatProvider.threads.collectAsState()
+
+    ScalingLazyColumn(
+        state = listState,
+        modifier = Modifier
+            .fillMaxWidth()
+            .onRotaryScrollEvent {
+                coroutineScope.launch {
+                    listState.animateScrollBy(it.verticalScrollPixels)
+                }
+                true
+            }
+            .focusRequester(focusRequester)
+            .focusable()
+            .wrapContentHeight(),
+    ) {
+        item {
+            Text(
+                "Chats",
+                style = MaterialTheme.typography.title2,
+                modifier = Modifier.padding(bottom = 8.dp)
+            )
+        }
+        item {
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                modifier = Modifier.padding(bottom = 10.dp)
+            ) {
+                Button(
+                    onClick = {
+                        navController.navigate(
+                            Screen.Info.buildRoute(
+                                "user",
+                                viewModel.getMe()!!.id
+                            )
+                        )
+                    },
+                    colors = ButtonDefaults.buttonColors(
+                        backgroundColor = MaterialTheme.colors.primaryVariant,
+                        contentColor = MaterialTheme.colors.onSurface
+                    )
                 ) {
                     Icon(
-                        painterResource(id = R.drawable.baseline_menu_24),
+                        painterResource(id = R.drawable.baseline_person_24),
                         contentDescription = null,
                     )
-
                 }
-            }*/
-            items(chats) { chatId ->
-                chatData[chatId]?.let { chat ->
-                    ChatItem(
-                        chat,
-                        onClick = {
-                            if (!forums.contains(chatId)) {
-                                navController.navigate(
-                                    Screen.Chat.buildRoute(
-                                        chatId,
-                                        Long.MAX_VALUE
-                                    )
-                                )
-                            } else {
-                                navController.navigate(Screen.Topic.buildRoute(chatId))
-                            }
-                        },
-                        viewModel
+                Button(
+                    onClick = { navController.navigate(Screen.Settings.buildRoute()) },
+                    colors = ButtonDefaults.buttonColors(
+                        backgroundColor = MaterialTheme.colors.primaryVariant,
+                        contentColor = MaterialTheme.colors.onSurface
+                    )
+                ) {
+                    Icon(
+                        painterResource(id = R.drawable.outline_settings_24),
+                        contentDescription = null,
                     )
                 }
             }
         }
-
-        LaunchedEffect(Unit) {
-            focusRequester.requestFocus()
+        items(chats) { chatId ->
+            chatData[chatId]?.let { chat ->
+                ChatItem(
+                    chat,
+                    onClick = {
+                        if (!forums.contains(chatId)) {
+                            navController.navigate(
+                                Screen.Chat.buildRoute(
+                                    chatId,
+                                    Long.MAX_VALUE
+                                )
+                            )
+                        } else {
+                            navController.navigate(Screen.Topic.buildRoute(chatId))
+                        }
+                    },
+                    viewModel
+                )
+            }
         }
-
     }
 }
 
@@ -192,7 +382,6 @@ fun ChatItem(chat: Chat, onClick: () -> Unit = {}, viewModel: HomeViewModel) {
                     modifier = Modifier.weight(1f)
                 )
             }
-
             // Status indicators
             Row(
                 modifier = Modifier.padding(start = 2.dp)

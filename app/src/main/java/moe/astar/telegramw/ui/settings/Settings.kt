@@ -1,7 +1,9 @@
 package moe.astar.telegramw.ui.settings
 
 import android.util.Log
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -16,7 +18,6 @@ import androidx.wear.compose.material.*
 import moe.astar.telegramw.R
 import moe.astar.telegramw.Screen
 import moe.astar.telegramw.UserPreferences
-import moe.astar.telegramw.ui.MainMenuViewModel
 import kotlin.system.exitProcess
 
 @Composable
@@ -139,14 +140,26 @@ fun SettingsScreen(viewModel: SettingsViewModel, navController: NavController) {
                 contentPadding = PaddingValues(top = 24.dp, bottom = 0.dp)
             ) {
                 item {
-                    Text("Notifications", textAlign = TextAlign.Center, style = MaterialTheme.typography.title2)
+                    Text(
+                        "Notifications",
+                        textAlign = TextAlign.Center,
+                        style = MaterialTheme.typography.title2
+                    )
                 }
-                item { NotificationToggle(state = settings.notificationEnabled, checkedChange = { value ->
-                    Log.d("SettingsScreen", value.toString())
-                    viewModel.setNotificationEnabled(value)
-                }) }
                 item {
-                    Text("General", textAlign = TextAlign.Center, style = MaterialTheme.typography.title2)
+                    NotificationToggle(
+                        state = settings.notificationEnabled,
+                        checkedChange = { value ->
+                            Log.d("SettingsScreen", value.toString())
+                            viewModel.setNotificationEnabled(value)
+                        })
+                }
+                item {
+                    Text(
+                        "General",
+                        textAlign = TextAlign.Center,
+                        style = MaterialTheme.typography.title2
+                    )
                 }
                 item { AboutChip(viewModel, navController) }
                 item { LogoutChip(viewModel, navController) }

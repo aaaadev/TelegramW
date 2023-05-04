@@ -93,7 +93,9 @@ sealed class Screen(val route: String) {
     }
 
     object TopicSelect : Screen("topicSelect/{chatId}/{messageId}/{fromChatId}/{destId}") {
-        fun buildRoute(chatId: Long, messageId: Long, fromChatId: Long, destId: Int): String = "topicSelect/${chatId}/${messageId}/${fromChatId}/${destId}"
+        fun buildRoute(chatId: Long, messageId: Long, fromChatId: Long, destId: Int): String =
+            "topicSelect/${chatId}/${messageId}/${fromChatId}/${destId}"
+
         fun getDestId(entry: NavBackStackEntry): Int? =
             entry.arguments?.getString("destId")?.toInt()
 
@@ -108,9 +110,12 @@ sealed class Screen(val route: String) {
     }
 
     object ChatSelect : Screen("chatSelect/{messageId}/{fromChatId}/{destId}") {
-        fun buildRoute(messageId: Long, fromChatId: Long, destId: Int): String = "chatSelect/${messageId}/${fromChatId}/${destId}"
+        fun buildRoute(messageId: Long, fromChatId: Long, destId: Int): String =
+            "chatSelect/${messageId}/${fromChatId}/${destId}"
+
         fun getDestId(entry: NavBackStackEntry): Int? =
             entry.arguments?.getString("destId")?.toInt()
+
         fun getMessageId(entry: NavBackStackEntry): Long? =
             entry.arguments?.getString("messageId")?.toLong()
 
