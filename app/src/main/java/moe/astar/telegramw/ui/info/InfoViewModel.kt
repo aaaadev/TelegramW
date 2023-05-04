@@ -35,6 +35,10 @@ class InfoViewModel @Inject constructor(
         return client.getUser(id)
     }
 
+    fun getUserInfo(id: Long): TdApi.UserFullInfo? {
+        return client.getUserInfo(id)
+    }
+
     fun getGroup(id: Long): TdApi.BasicGroup? {
         return client.getBasicGroup(id)
     }

@@ -13,6 +13,7 @@ import moe.astar.telegramw.UserPreferences
 import moe.astar.telegramw.theme.WeargramTheme
 import moe.astar.telegramw.ui.about.AboutScreen
 import moe.astar.telegramw.ui.chat.ChatScreen
+import moe.astar.telegramw.ui.home.ChatSelectScreen
 import moe.astar.telegramw.ui.home.HomeScreen
 import moe.astar.telegramw.ui.info.InfoScreen
 import moe.astar.telegramw.ui.login.LoginScreen
@@ -21,6 +22,7 @@ import moe.astar.telegramw.ui.message.SelectReactionScreen
 import moe.astar.telegramw.ui.settings.SettingsScreen
 import moe.astar.telegramw.ui.settings.UserPreferencesRepository
 import moe.astar.telegramw.ui.topic.TopicScreen
+import moe.astar.telegramw.ui.topic.TopicSelectScreen
 import moe.astar.telegramw.ui.util.MapScreen
 import moe.astar.telegramw.ui.util.VideoView
 
@@ -137,7 +139,7 @@ private fun MainNavHost(navController: NavHostController) {
         }
 
         composable(Screen.Settings.route) {
-            SettingsScreen(viewModel = hiltViewModel(it))
+            SettingsScreen(viewModel = hiltViewModel(it), navController = navController)
         }
 
         composable(Screen.SelectReaction.route) {
@@ -155,6 +157,41 @@ private fun MainNavHost(navController: NavHostController) {
 
         composable(Screen.About.route) {
             AboutScreen(navController, viewModel = hiltViewModel(it))
+        }
+
+        composable(Screen.TopicSelect.route) {
+            Screen.TopicSelect.getChatId(it)?.also { chatId ->
+                Screen.TopicSelect.getMessageId(it)?.also { messageId ->
+                    Screen.TopicSelect.getFromChatId(it)?.also { fromChatId ->
+                        Screen.TopicSelect.getDestId(it)?.also { destId ->
+                            TopicSelectScreen(
+                                chatId = chatId,
+                                navController = navController,
+                                viewModel = hiltViewModel(it),
+                                messageId = messageId,
+                                fromChatId = fromChatId,
+                                destId = destId
+                            )
+                        }
+                    }
+                }
+            }
+        }
+
+        composable(Screen.ChatSelect.route) {
+            Screen.ChatSelect.getDestId(it)?.also { destId ->
+                Screen.ChatSelect.getMessageId(it)?.also { messageId ->
+                    Screen.ChatSelect.getFromChatId(it)?.also { fromChatId ->
+                        ChatSelectScreen(
+                            navController = navController,
+                            viewModel = hiltViewModel(it),
+                            messageId = messageId,
+                            fromChatId = fromChatId,
+                            destId = destId
+                        )
+                    }
+                }
+            }
         }
     }
 }

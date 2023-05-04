@@ -64,10 +64,10 @@ fun HomeScaffold(navController: NavController, viewModel: HomeViewModel) {
     val forums by viewModel.chatProvider.threads.collectAsState()
     //val forumData by viewModel.chatProvider.threadData.collectAsState()
 
-    Log.d("HomeScaffold", "chats: " + chats.size.toString())
-    Log.d("HomeScaffold", "chatData: " + chatData.size.toString())
-
     Scaffold(
+        timeText = {
+            TimeText()
+        },
         positionIndicator = {
             PositionIndicator(
                 scalingLazyListState = listState,
@@ -90,8 +90,35 @@ fun HomeScaffold(navController: NavController, viewModel: HomeViewModel) {
                 .focusable()
                 .wrapContentHeight(),
         ) {
-
             item {
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.padding(bottom = 10.dp)) {
+                    Button(
+                        onClick = { navController.navigate(Screen.Info.buildRoute("user", viewModel.getMe()!!.id)) },
+                        colors = ButtonDefaults.buttonColors(
+                            backgroundColor = MaterialTheme.colors.primaryVariant,
+                            contentColor = MaterialTheme.colors.onSurface
+                        )
+                    ) {
+                        Icon(
+                            painterResource(id = R.drawable.baseline_person_24),
+                            contentDescription = null,
+                        )
+                    }
+                    Button(
+                        onClick = { navController.navigate(Screen.Settings.buildRoute()) },
+                        colors = ButtonDefaults.buttonColors(
+                            backgroundColor = MaterialTheme.colors.primaryVariant,
+                            contentColor = MaterialTheme.colors.onSurface
+                        )
+                    ) {
+                        Icon(
+                            painterResource(id = R.drawable.outline_settings_24),
+                            contentDescription = null,
+                        )
+                    }
+                }
+            }
+            /*item {
                 CompactButton(
                     onClick = { navController.navigate(Screen.MainMenu.route) },
                     modifier = Modifier.padding(6.dp),
@@ -103,7 +130,7 @@ fun HomeScaffold(navController: NavController, viewModel: HomeViewModel) {
                     )
 
                 }
-            }
+            }*/
             items(chats) { chatId ->
                 chatData[chatId]?.let { chat ->
                     ChatItem(

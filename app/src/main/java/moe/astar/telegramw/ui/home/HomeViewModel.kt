@@ -11,6 +11,7 @@ import moe.astar.telegramw.client.Authenticator
 import moe.astar.telegramw.client.Authorization
 import moe.astar.telegramw.client.ChatProvider
 import moe.astar.telegramw.client.TelegramClient
+import org.drinkless.tdlib.TdApi
 import javax.inject.Inject
 
 @HiltViewModel
@@ -41,6 +42,10 @@ class HomeViewModel @Inject constructor(
                 }
             }
         }.launchIn(viewModelScope)
+    }
+
+    fun getMe(): TdApi.User? {
+        return client.getMe()
     }
 }
 

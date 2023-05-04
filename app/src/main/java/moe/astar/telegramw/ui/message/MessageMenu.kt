@@ -10,10 +10,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.Delete
-import androidx.compose.material.icons.outlined.Edit
-import androidx.compose.material.icons.outlined.EmojiEmotions
-import androidx.compose.material.icons.outlined.Reply
+import androidx.compose.material.icons.outlined.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -176,6 +173,23 @@ fun MessageMenuScaffold(
                         )
                     })
                 }
+                if (message.canBeForwarded) {
+                    item {
+                        ForwardItem(
+                            onClick = {
+                                navController.currentDestination?.id?.also {
+                                    navController.navigate(
+                                        Screen.ChatSelect.buildRoute(
+                                            message.id,
+                                            message.chatId,
+                                            it
+                                        )
+                                    )
+                                }
+                            }
+                        )
+                    }
+                }
                 item {
                     Text("Reply message")
                 }
@@ -301,6 +315,15 @@ fun ReplyItem(onClick: () -> Unit) {
     MenuItem(
         title = "Text",
         imageVector = Icons.Outlined.Reply,
+        onClick = onClick
+    )
+}
+
+@Composable
+fun ForwardItem(onClick: () -> Unit) {
+    MenuItem(
+        title = "Forward",
+        imageVector = Icons.Outlined.Forward,
         onClick = onClick
     )
 }

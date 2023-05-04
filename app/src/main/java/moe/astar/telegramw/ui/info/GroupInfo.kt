@@ -66,6 +66,9 @@ fun GroupInfoScaffold(
                 chat.value?.also {
                     item { GroupName(it) }
                 }
+                info?.also {
+                    item { BasicGroupDescription(it) }
+                }
 
                 item {
                     Text("Notification Settings")
@@ -137,6 +140,10 @@ fun UserItem(userId: Long, viewModel: InfoViewModel, navController: NavControlle
 
 }
 
+@Composable
+fun BasicGroupDescription(group: TdApi.BasicGroupFullInfo) {
+    Text(group.description)
+}
 
 @Composable
 fun GroupName(chat: TdApi.Chat) {

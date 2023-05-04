@@ -11,6 +11,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.ServiceConnection
 import android.os.Bundle
+import android.os.Handler
 import android.os.IBinder
 import android.util.Log
 import androidx.activity.compose.setContent
@@ -59,14 +60,15 @@ class MainActivity : AppCompatActivity() {
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
+            setTheme(R.style.AppTheme)
+            super.onCreate(savedInstanceState)
 
-        Configuration.getInstance().userAgentValue = BuildConfig.APPLICATION_ID
+            Configuration.getInstance().userAgentValue = BuildConfig.APPLICATION_ID
 
-        setContent {
-            App(
-                enableNotification = { this.enableNotification() },
-                disableNotification = { this.disableNotification() })
-        }
+            setContent {
+                App(
+                    enableNotification = { this.enableNotification() },
+                    disableNotification = { this.disableNotification() })
+            }
     }
 }

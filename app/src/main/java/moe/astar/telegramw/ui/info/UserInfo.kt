@@ -42,6 +42,7 @@ fun UserInfoScaffold(user: TdApi.User, viewModel: InfoViewModel, navController: 
             chatValue.id,
             NotificationPreferneces.getDefaultInstance()
         )
+        val userInfo = viewModel.getUserInfo(user.id)
         Scaffold(
             vignette = { Vignette(vignettePosition = VignettePosition.TopAndBottom) },
         ) {
@@ -67,6 +68,9 @@ fun UserInfoScaffold(user: TdApi.User, viewModel: InfoViewModel, navController: 
                 item { UserStatus(user) }
                 item { Username(user) }
                 item { PhoneNumber(user) }
+                if (userInfo != null) {
+                    item { UserBio(userInfo!!) }
+                }
                 item { SendMessage(user, viewModel, navController) }
 
                 item {
@@ -99,6 +103,13 @@ fun Name(user: TdApi.User) {
 fun Username(user: TdApi.User) {
     if (user.usernames != null) {
         Text("@${user.usernames!!.activeUsernames[0]}")
+    }
+}
+
+@Composable
+fun UserBio(user: TdApi.UserFullInfo) {
+    if (user.bio != null) {
+        Text("${user.bio!!}")
     }
 }
 

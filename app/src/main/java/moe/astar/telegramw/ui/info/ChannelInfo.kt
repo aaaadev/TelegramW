@@ -1,5 +1,6 @@
 package moe.astar.telegramw.ui.info
 
+import android.util.Log
 import androidx.compose.foundation.layout.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -70,6 +71,10 @@ fun ChannelInfoScaffold(
                     item { ChannelName(it) }
                 }
 
+                info?.also {
+                    item { ChannelDescription(it) }
+                }
+
                 item {
                     Text("Notification Settings")
                 }
@@ -114,4 +119,9 @@ fun ChannelName(chat: TdApi.Chat) {
         style = MaterialTheme.typography.title2,
         modifier = Modifier.padding(top = 5.dp, bottom = 10.dp)
     )
+}
+
+@Composable
+fun ChannelDescription(info: TdApi.SupergroupFullInfo) {
+    Text(info.description)
 }

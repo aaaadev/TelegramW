@@ -99,6 +99,9 @@ fun ChatScaffold(
     }
 
     Scaffold(
+        timeText = {
+            TimeText()
+        },
         positionIndicator = {
             PositionIndicator(
                 scalingLazyListState = listState, modifier = Modifier

@@ -15,6 +15,7 @@ import kotlinx.coroutines.launch
 import moe.astar.telegramw.NotificationGroup
 import moe.astar.telegramw.NotificationPreferneces
 import moe.astar.telegramw.UserPreferences
+import moe.astar.telegramw.client.Authenticator
 import java.io.InputStream
 import java.io.OutputStream
 import javax.inject.Inject
@@ -120,9 +121,14 @@ class NotificationRepository @Inject constructor(
 
 @HiltViewModel
 class SettingsViewModel @Inject constructor(
+    private val authenticator: Authenticator,
     private val userRepository: UserPreferencesRepository
     //val client: TelegramClient,
 ) : ViewModel() {
+    fun logOut() {
+        authenticator.reset()
+    }
+
     val flow: Flow<UserPreferences> = userRepository.flow
 
     fun toggleNotification() {

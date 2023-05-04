@@ -32,9 +32,10 @@ fun AboutScreen(
         verticalArrangement = Arrangement.spacedBy(4.dp),
         contentPadding = PaddingValues(top = 24.dp, bottom = 0.dp)
     ) {
-        item { Text(text = "About", textAlign = TextAlign.Center, style = MaterialTheme.typography.title1) }
+        item { Text(text = "About", textAlign = TextAlign.Center, style = MaterialTheme.typography.title2) }
         item {
             TitleCard(
+                modifier = Modifier.fillMaxWidth(0.9f),
                 onClick = {},
                 title = { Text("Telegram W") },
                 contentColor = MaterialTheme.colors.onSurface,
@@ -45,6 +46,7 @@ fun AboutScreen(
         }
         item {
             TitleCard(
+                modifier = Modifier.fillMaxWidth(0.9f),
                 onClick = {},
                 title = { Text("TDLight") },
                 contentColor = MaterialTheme.colors.onSurface,
