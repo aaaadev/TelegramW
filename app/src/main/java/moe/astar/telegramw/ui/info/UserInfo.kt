@@ -109,7 +109,7 @@ fun Username(user: TdApi.User) {
 @Composable
 fun UserBio(user: TdApi.UserFullInfo) {
     if (user.bio != null) {
-        Text("${user.bio!!}")
+        Text(user.bio!!.text)
     }
 }
 
