@@ -11,10 +11,15 @@ import android.os.IBinder
 import android.util.Log
 import androidx.core.app.NotificationCompat
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.filterIsInstance
+import kotlinx.coroutines.runBlocking
 import moe.astar.telegramw.client.NotificationProvider
 import moe.astar.telegramw.client.TelegramClient
 import org.drinkless.tdlib.TdApi
 import javax.inject.Inject
+
 
 @AndroidEntryPoint
 class NotificationService : Service() {
@@ -45,38 +50,57 @@ class NotificationService : Service() {
             val chatId = intent.getLongExtra("chatId", 0)
             val msgIds = intent.getLongArrayExtra("msgIds")
             Log.d(TAG, "trying to read ${msgIds?.size} messages from $chatId")
-            client.sendUnscopedRequest(
-                TdApi.ViewMessages(
-                    chatId,
-                    msgIds,
-                    null,
-                    true
-                )
-            )
+            runBlocking {
+                val result = CompletableDeferred<TdApi.Ok>()
+                runBlocking {
+                    client.sendRequest(
+                        TdApi.ViewMessages(
+                            chatId,
+                            msgIds,
+                            null,
+                            true
+                        )
+                    ).filterIsInstance<TdApi.Ok>().collect {
+                        result.complete(it)
+                    }
+                }
+                result.await()
+            }
         }
     }
 
     private val replyReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
+            Log.d("NotificationService", intent.extras?.containsKey("threadId").toString())
             val chatId = intent.getLongExtra("chatId", 0)
-            val msgIds = intent.getLongArrayExtra("msgIds")
-            val reply = intent.getStringExtra("reply")
-            client.sendUnscopedRequest(
-                TdApi.SendMessage(
-                    chatId,
-                    0,
-                    msgIds!![0],
-                    TdApi.MessageSendOptions(),
-                    null,
-                    TdApi.InputMessageText(
-                        TdApi.FormattedText(
-                            reply, emptyArray()
-                        ),
-                        false,
-                        false,
-                    )
-                )
-            )
+            val threadId = intent.getLongExtra("threadId", 0)
+            val messageId = intent.getLongExtra("messageId", 0)
+            val reply = RemoteInput.getResultsFromIntent(intent).getString("reply")
+            Log.d("NotificationService", "Send reply $reply to $messageId ($threadId) $chatId")
+            runBlocking {
+                val result = CompletableDeferred<TdApi.Message>()
+                runBlocking {
+                    client.sendRequest(
+                        TdApi.SendMessage(
+                            chatId,
+                            threadId,
+                            messageId,
+                            TdApi.MessageSendOptions(),
+                            null,
+                            TdApi.InputMessageText(
+                                TdApi.FormattedText(
+                                    reply, emptyArray()
+                                ),
+                                false,
+                                false,
+                            )
+                        )
+                    ).filterIsInstance<TdApi.Message>().collect {
+                        result.complete(it)
+                    }
+                }
+                result.await()
+            }
         }
     }
 

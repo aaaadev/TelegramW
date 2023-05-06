@@ -5,6 +5,7 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.media.MediaMetadataRetriever
 import android.net.Uri
+import android.os.Build
 import android.os.CountDownTimer
 import android.util.Log
 import android.view.MotionEvent
@@ -34,17 +35,31 @@ import androidx.core.content.ContextCompat
 import androidx.core.content.ContextCompat.startActivity
 import androidx.navigation.NavController
 import androidx.wear.compose.material.*
+import coil.compose.*
+import coil.decode.VideoFrameDecoder
+import coil.request.ImageRequest
+import coil.size.Size
+import com.airbnb.lottie.compose.*
+import com.google.zxing.common.StringUtils
 import moe.astar.telegramw.R
 import moe.astar.telegramw.Screen
 import moe.astar.telegramw.ui.util.MapView
 import moe.astar.telegramw.ui.util.MessageStatusIcon
 import moe.astar.telegramw.ui.util.ShortDescription
 import moe.astar.telegramw.ui.util.VideoView
+import okio.Okio
+import okio.buffer
+import okio.source
 import org.drinkless.tdlib.TdApi
 import org.osmdroid.util.GeoPoint
 import org.osmdroid.views.CustomZoomButtonsController
 import org.osmdroid.views.overlay.Marker
+import java.io.File
+import java.io.FileInputStream
+import java.nio.charset.Charset
 import java.text.DateFormat
+import java.util.zip.GZIPInputStream
+
 
 @Composable
 fun MessageContent(
@@ -967,6 +982,23 @@ fun VideoNoteMessage(
     }
 }
 
+@JvmField
+val UTF_8: Charset = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) java.nio.charset.StandardCharsets.UTF_8 else Charset.forName("UTF-8")
+
+fun gzipFileToString(path: String?): String? {
+    try {
+        GZIPInputStream(FileInputStream(File(path))).source().buffer().use { buffer ->
+            return buffer.readString(
+                UTF_8
+            )
+        }
+    } catch (t: Throwable) {
+        Log.d("MessageContent", "Cannot decode GZip, path: $path")
+        return null
+    }
+}
+
+
 @Composable
 fun StickerMessage(
     message: TdApi.Message,
@@ -982,19 +1014,112 @@ fun StickerMessage(
         remember { viewModel.fetchFile(content.sticker.sticker) }.collectAsState(initial = null)
 
     path.value?.also {
-        BitmapFactory.decodeFile(it)?.asImageBitmap()?.also { bitmap ->
-            Column {
-                Image(bitmap = bitmap, contentDescription = null)
+        when (content.sticker.format) {
+            is TdApi.StickerFormatWebp -> {
+                val painter = rememberAsyncImagePainter(
+                    model = ImageRequest.Builder(LocalContext.current)
+                        .data("file://$it")
+                        .size(Size.ORIGINAL) // Set the target size to load the image at.
+                        .build()
+                )
+                val state = painter.state
+                if (state is AsyncImagePainter.State.Loading || state is AsyncImagePainter.State.Error) {
+                    MessageCard(
+                        message,
+                        navController = navController,
+                        onClick = onClick,
+                        viewModel = viewModel,
+                        scrollReply = scrollReply,
+                        showSender = showSender,
+                    ) {
+                        Text(content.sticker.emoji + " Sticker")
+                    }
+                } else {
+                    MessageCard(
+                        message,
+                        navController = navController,
+                        onClick = onClick,
+                        viewModel = viewModel,
+                        scrollReply = scrollReply,
+                        showSender = showSender,
+                    ) {
+                        Image(
+                            painter = painter,
+                            contentDescription = content.sticker.emoji + " Sticker",
+                            modifier = Modifier.width(130.dp)
+                        )
+                    }
+                }
             }
-        } ?: MessageCard(
-            message,
-            navController = navController,
-            onClick = onClick,
-            viewModel = viewModel,
-            scrollReply = scrollReply,
-            showSender = showSender,
-        ) {
-            Text(content.sticker.emoji + " Sticker")
+            is TdApi.StickerFormatTgs -> {
+                gzipFileToString(it)?.also { json ->
+                    val composition by rememberLottieComposition(
+                        LottieCompositionSpec.JsonString(
+                            json
+                        )
+                    )
+                    MessageCard(
+                        message,
+                        navController = navController,
+                        onClick = onClick,
+                        viewModel = viewModel,
+                        scrollReply = scrollReply,
+                        showSender = showSender,
+                    ) {
+                        LottieAnimation(
+                            iterations = LottieConstants.IterateForever,
+                            modifier = Modifier.width(130.dp).height(130.dp),
+                            composition = composition,
+                        )
+                    }
+                } ?: MessageCard(
+                    message,
+                    navController = navController,
+                    onClick = onClick,
+                    viewModel = viewModel,
+                    scrollReply = scrollReply,
+                    showSender = showSender,
+                ) {
+                    Text(content.sticker.emoji + " Sticker")
+                }
+            }
+            is TdApi.StickerFormatWebm -> {
+                val painter = rememberAsyncImagePainter(
+                    model = ImageRequest.Builder(LocalContext.current)
+                        .decoderFactory(VideoFrameDecoder.Factory())
+                        .data("file://$it")
+                        .size(Size.ORIGINAL) // Set the target size to load the image at.
+                        .build()
+                )
+                val state = painter.state
+                if (state is AsyncImagePainter.State.Loading || state is AsyncImagePainter.State.Error) {
+                    MessageCard(
+                        message,
+                        navController = navController,
+                        onClick = onClick,
+                        viewModel = viewModel,
+                        scrollReply = scrollReply,
+                        showSender = showSender,
+                    ) {
+                        Text(content.sticker.emoji + " Sticker")
+                    }
+                } else {
+                    MessageCard(
+                        message,
+                        navController = navController,
+                        onClick = onClick,
+                        viewModel = viewModel,
+                        scrollReply = scrollReply,
+                        showSender = showSender,
+                    ) {
+                        Image(
+                            painter = painter,
+                            contentDescription = content.sticker.emoji + " Sticker",
+                            modifier = Modifier.width(130.dp)
+                        )
+                    }
+                }
+            }
         }
     }
 }

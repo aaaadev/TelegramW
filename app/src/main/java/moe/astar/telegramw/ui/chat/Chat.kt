@@ -78,8 +78,8 @@ fun ChatScaffold(
     threadId: Long?,
     viewModel: ChatViewModel
 ) {
-    val messageIds by viewModel.messageProvider.messageIds.collectAsState()
-    val messages by viewModel.messageProvider.messageData.collectAsState()
+    val messageIds by remember { viewModel.messageProvider.messageIds }.collectAsState()
+    val messages by remember { viewModel.messageProvider.messageData }.collectAsState()
 
     val scrollDirection by viewModel.scrollDirectionFlow.collectAsState()
 

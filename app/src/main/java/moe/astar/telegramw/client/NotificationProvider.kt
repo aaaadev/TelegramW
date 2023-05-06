@@ -6,10 +6,12 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
+import android.os.Bundle
 import android.util.Log
 import androidx.core.app.*
 import androidx.core.app.Person
 import androidx.core.app.RemoteInput
+import androidx.core.content.ContextCompat.startActivity
 import androidx.core.graphics.drawable.IconCompat
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineScope
@@ -19,6 +21,7 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
+import moe.astar.telegramw.MainActivity
 import moe.astar.telegramw.NotificationPreferneces
 import moe.astar.telegramw.R
 import moe.astar.telegramw.ui.settings.NotificationRepository
@@ -26,6 +29,7 @@ import org.drinkless.tdlib.TdApi
 import org.drinkless.tdlib.TdApi.MessageSenderUser
 import java.util.concurrent.ConcurrentHashMap
 import javax.inject.Inject
+
 
 class NotificationProvider @Inject constructor(
     @ApplicationContext private val context: Context,
@@ -206,18 +210,19 @@ class NotificationProvider @Inject constructor(
         }
 
         val replyIntent = Intent().also {
-            it.action = "REPLY"
-            it.putExtra("chatId", group.chatId)
-            val msgs = messages.map { msg -> msg.message.id }.toLongArray()
-            Log.d(TAG, "putting ${msgs.size} messages")
-            it.putExtra("msgIds", msgs)
+            if (messages.isNotEmpty()) {
+                it.action = "REPLY"
+                it.putExtra("chatId", group.chatId)
+                it.putExtra("threadId", messages[messages.size -1].message.messageThreadId)
+                it.putExtra("messageId", messages[messages.size -1].message.id)
+            }
         }
 
         val markAsReadAction = NotificationCompat.Action
             .Builder(
                 R.drawable.baseline_play_arrow_24,
                 "Mark as read",
-                PendingIntent.getService(context, 0, markAsReadIntent, 0)
+                PendingIntent.getBroadcast(context, 0, markAsReadIntent, PendingIntent.FLAG_UPDATE_CURRENT)
             )
             .build()
 
@@ -225,12 +230,12 @@ class NotificationProvider @Inject constructor(
             .Builder(
                 R.drawable.outline_reply_24,
                 "Reply",
-                PendingIntent.getService(context, 0, replyIntent, 0)
+                PendingIntent.getBroadcast(context, 0, replyIntent, PendingIntent.FLAG_UPDATE_CURRENT)
             )
             .addRemoteInput(RemoteInput.Builder("reply").run { setLabel("Reply") }.build())
             .build()
 
-        //val mainIntent = Intent(context, MainActivity::class.java)
+        val mainIntent = Intent(context, MainActivity::class.java)
 
         return NotificationCompat.Builder(context, NOTIFICATION_CHANNEL_ID)
             .setSmallIcon(R.mipmap.ic_launcher)
@@ -284,8 +289,8 @@ class NotificationProvider @Inject constructor(
     private fun refreshNotifications() {
         val notification = NotificationCompat.Builder(context, NOTIFICATION_CHANNEL_ID)
             .setSmallIcon(R.mipmap.ic_launcher)
-            .setContentTitle("Weargram")
-            .setContentText("This is a summary")
+            .setContentTitle("Telegram W")
+            .setContentText("No notifications")
             .setGroup(GROUP_ID)
             .setGroupSummary(true)
             .build()
