@@ -28,6 +28,8 @@ import javax.inject.Inject
 import kotlin.math.abs
 import kotlin.math.sign
 
+const val STICKERS_PER_ROW: Int = 3
+
 @HiltViewModel
 class ChatViewModel @Inject constructor(
     val client: TelegramClient,

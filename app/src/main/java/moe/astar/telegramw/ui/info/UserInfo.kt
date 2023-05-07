@@ -69,7 +69,7 @@ fun UserInfoScaffold(user: TdApi.User, viewModel: InfoViewModel, navController: 
                 item { Username(user) }
                 item { PhoneNumber(user) }
                 if (userInfo != null) {
-                    item { UserBio(userInfo!!) }
+                    item { UserBio(userInfo) }
                 }
                 item { SendMessage(user, viewModel, navController) }
 

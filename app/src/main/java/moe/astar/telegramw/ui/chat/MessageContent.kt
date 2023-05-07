@@ -35,19 +35,21 @@ import androidx.core.content.ContextCompat
 import androidx.core.content.ContextCompat.startActivity
 import androidx.navigation.NavController
 import androidx.wear.compose.material.*
-import coil.compose.*
+import coil.compose.AsyncImagePainter
+import coil.compose.rememberAsyncImagePainter
 import coil.decode.VideoFrameDecoder
 import coil.request.ImageRequest
 import coil.size.Size
-import com.airbnb.lottie.compose.*
-import com.google.zxing.common.StringUtils
+import com.airbnb.lottie.compose.LottieAnimation
+import com.airbnb.lottie.compose.LottieCompositionSpec
+import com.airbnb.lottie.compose.LottieConstants
+import com.airbnb.lottie.compose.rememberLottieComposition
 import moe.astar.telegramw.R
 import moe.astar.telegramw.Screen
 import moe.astar.telegramw.ui.util.MapView
 import moe.astar.telegramw.ui.util.MessageStatusIcon
 import moe.astar.telegramw.ui.util.ShortDescription
 import moe.astar.telegramw.ui.util.VideoView
-import okio.Okio
 import okio.buffer
 import okio.source
 import org.drinkless.tdlib.TdApi
@@ -983,7 +985,10 @@ fun VideoNoteMessage(
 }
 
 @JvmField
-val UTF_8: Charset = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) java.nio.charset.StandardCharsets.UTF_8 else Charset.forName("UTF-8")
+val UTF_8: Charset =
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) java.nio.charset.StandardCharsets.UTF_8 else Charset.forName(
+        "UTF-8"
+    )
 
 fun gzipFileToString(path: String?): String? {
     try {
@@ -1068,7 +1073,9 @@ fun StickerMessage(
                     ) {
                         LottieAnimation(
                             iterations = LottieConstants.IterateForever,
-                            modifier = Modifier.width(130.dp).height(130.dp),
+                            modifier = Modifier
+                                .width(130.dp)
+                                .height(130.dp),
                             composition = composition,
                         )
                     }

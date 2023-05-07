@@ -21,6 +21,7 @@ import moe.astar.telegramw.ui.message.MessageMenuScreen
 import moe.astar.telegramw.ui.message.SelectReactionScreen
 import moe.astar.telegramw.ui.settings.SettingsScreen
 import moe.astar.telegramw.ui.settings.UserPreferencesRepository
+import moe.astar.telegramw.ui.stickers.SelectStickersScreen
 import moe.astar.telegramw.ui.topic.TopicScreen
 import moe.astar.telegramw.ui.topic.TopicSelectScreen
 import moe.astar.telegramw.ui.util.MapScreen
@@ -189,6 +190,20 @@ private fun MainNavHost(navController: NavHostController) {
                             destId = destId
                         )
                     }
+                }
+            }
+        }
+
+
+        composable(Screen.SelectStickers.route) {
+            Screen.SelectStickers.getMessageId(it)?.also { messageId ->
+                Screen.SelectStickers.getChatId(it)?.also { chatId ->
+                    SelectStickersScreen(
+                        navController = navController,
+                        viewModel = hiltViewModel(it),
+                        messageId = messageId,
+                        chatId = chatId,
+                    )
                 }
             }
         }

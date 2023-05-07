@@ -66,7 +66,14 @@ fun ChatMenuScreen(chatId: Long, viewModel: ChatMenuViewModel, navController: Na
                 MenuItem(
                     title = "Sticker",
                     iconPainter = painterResource(id = R.drawable.baseline_emoji_emotions_24),
-                    onClick = {}
+                    onClick = {
+                        navController.navigate(
+                            Screen.SelectStickers.buildRoute(
+                                0,
+                                chatId
+                            )
+                        )
+                    }
                 )
             }
 

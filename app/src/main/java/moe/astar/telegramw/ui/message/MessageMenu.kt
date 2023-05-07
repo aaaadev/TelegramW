@@ -207,6 +207,11 @@ fun MessageMenuScaffold(
                         launcher.launch(intent)
                     })
                 }
+                item {
+                    ReplyStickerItem {
+                        navController.navigate(Screen.SelectStickers.buildRoute(message.id, chatId))
+                    }
+                }
                 message.interactionInfo?.also { interactionInfo ->
                     item {
                         Text("Reactions")
@@ -315,6 +320,15 @@ fun ReplyItem(onClick: () -> Unit) {
     MenuItem(
         title = "Text",
         imageVector = Icons.Outlined.Reply,
+        onClick = onClick
+    )
+}
+
+@Composable
+fun ReplyStickerItem(onClick: () -> Unit) {
+    MenuItem(
+        title = "Sticker",
+        imageVector = Icons.Outlined.EmojiEmotions,
         onClick = onClick
     )
 }

@@ -6,12 +6,10 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
-import android.os.Bundle
 import android.util.Log
 import androidx.core.app.*
 import androidx.core.app.Person
 import androidx.core.app.RemoteInput
-import androidx.core.content.ContextCompat.startActivity
 import androidx.core.graphics.drawable.IconCompat
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineScope
@@ -213,8 +211,8 @@ class NotificationProvider @Inject constructor(
             if (messages.isNotEmpty()) {
                 it.action = "REPLY"
                 it.putExtra("chatId", group.chatId)
-                it.putExtra("threadId", messages[messages.size -1].message.messageThreadId)
-                it.putExtra("messageId", messages[messages.size -1].message.id)
+                it.putExtra("threadId", messages[messages.size - 1].message.messageThreadId)
+                it.putExtra("messageId", messages[messages.size - 1].message.id)
             }
         }
 
@@ -222,7 +220,12 @@ class NotificationProvider @Inject constructor(
             .Builder(
                 R.drawable.baseline_play_arrow_24,
                 "Mark as read",
-                PendingIntent.getBroadcast(context, 0, markAsReadIntent, PendingIntent.FLAG_UPDATE_CURRENT)
+                PendingIntent.getBroadcast(
+                    context,
+                    0,
+                    markAsReadIntent,
+                    PendingIntent.FLAG_UPDATE_CURRENT
+                )
             )
             .build()
 
@@ -230,7 +233,12 @@ class NotificationProvider @Inject constructor(
             .Builder(
                 R.drawable.outline_reply_24,
                 "Reply",
-                PendingIntent.getBroadcast(context, 0, replyIntent, PendingIntent.FLAG_UPDATE_CURRENT)
+                PendingIntent.getBroadcast(
+                    context,
+                    0,
+                    replyIntent,
+                    PendingIntent.FLAG_UPDATE_CURRENT
+                )
             )
             .addRemoteInput(RemoteInput.Builder("reply").run { setLabel("Reply") }.build())
             .build()

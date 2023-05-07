@@ -15,6 +15,4 @@ class AboutViewModel @Inject constructor(
     val chatProvider: ChatProvider,
     val messageProvider: MessageProvider,
     @ApplicationContext context: Context
-) : ViewModel() {
-
-}
+) : ViewModel()

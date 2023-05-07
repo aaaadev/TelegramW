@@ -122,5 +122,16 @@ sealed class Screen(val route: String) {
         fun getFromChatId(entry: NavBackStackEntry): Long? =
             entry.arguments?.getString("fromChatId")?.toLong()
     }
+
+    object SelectStickers : Screen("selectStickers/{chatId}/{messageId}") {
+        fun buildRoute(messageId: Long, chatId: Long): String =
+            "selectStickers/${chatId}/${messageId}"
+
+        fun getMessageId(entry: NavBackStackEntry): Long? =
+            entry.arguments?.getString("messageId")?.toLong()
+
+        fun getChatId(entry: NavBackStackEntry): Long? =
+            entry.arguments?.getString("chatId")?.toLong()
+    }
     //object CreateChat : Screen("createChat")
 }
