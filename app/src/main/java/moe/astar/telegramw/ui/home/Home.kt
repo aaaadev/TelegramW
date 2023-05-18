@@ -51,11 +51,13 @@ fun HomeScreen(navController: NavController, viewModel: HomeViewModel) {
             }
         }
         HomeState.Login -> {
+            LocalContext.current.applicationContext.setTheme(R.style.AppTheme)
             navController.navigate(Screen.Login.route) {
                 launchSingleTop = true
             }
         }
         HomeState.Ready -> {
+            LocalContext.current.applicationContext.setTheme(R.style.AppTheme)
             HomeScaffold(navController, viewModel)
         }
     }
@@ -354,7 +356,7 @@ fun ChatPage(
 fun ChatItem(chat: Chat, onClick: () -> Unit = {}, viewModel: HomeViewModel) {
     Card(
         onClick = onClick,
-        backgroundPainter = ColorPainter(MaterialTheme.colors.surface),
+        backgroundPainter = ColorPainter(MaterialTheme.colors.background),
     ) {
 
         Row(horizontalArrangement = Arrangement.SpaceBetween) {

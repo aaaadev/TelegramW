@@ -7,7 +7,6 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import androidx.wear.compose.navigation.SwipeDismissableNavHost
 import androidx.wear.compose.navigation.composable
-import androidx.wear.compose.navigation.rememberSwipeDismissableNavController
 import moe.astar.telegramw.Screen
 import moe.astar.telegramw.UserPreferences
 import moe.astar.telegramw.theme.WeargramTheme
@@ -28,7 +27,11 @@ import moe.astar.telegramw.ui.util.MapScreen
 import moe.astar.telegramw.ui.util.VideoView
 
 @Composable
-fun App(enableNotification: () -> Unit, disableNotification: () -> Unit) {
+fun App(
+    navController: NavHostController,
+    enableNotification: () -> Unit,
+    disableNotification: () -> Unit
+) {
     val userRepository = UserPreferencesRepository(LocalContext.current)
     val settings =
         userRepository.flow.collectAsState(initial = UserPreferences.getDefaultInstance())
@@ -40,7 +43,6 @@ fun App(enableNotification: () -> Unit, disableNotification: () -> Unit) {
     }
 
     WeargramTheme {
-        val navController = rememberSwipeDismissableNavController()
         MainNavHost(navController)
     }
 }
@@ -48,6 +50,7 @@ fun App(enableNotification: () -> Unit, disableNotification: () -> Unit) {
 @Composable
 private fun MainNavHost(navController: NavHostController) {
     SwipeDismissableNavHost(navController, startDestination = Screen.Home.route) {
+
         composable(Screen.Home.route) {
             HomeScreen(navController, hiltViewModel(it))
         }
@@ -108,7 +111,15 @@ private fun MainNavHost(navController: NavHostController) {
         composable(Screen.Info.route) {
             Screen.Info.getType(it)?.also { type ->
                 Screen.Info.getId(it)?.also { id ->
-                    InfoScreen(
+                    Screen.Info.getUsername(it)?.also { username ->
+                        InfoScreen(
+                            navController = navController,
+                            type = type,
+                            id = id,
+                            viewModel = hiltViewModel(it),
+                            username = username,
+                        )
+                    } ?: InfoScreen(
                         navController = navController,
                         type = type,
                         id = id,

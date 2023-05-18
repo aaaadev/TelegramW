@@ -6,6 +6,7 @@ import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
@@ -23,15 +24,50 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.wear.compose.material.*
+import moe.astar.telegramw.Screen
 import org.drinkless.tdlib.TdApi
 
 @Composable
-fun InfoScreen(type: String, id: Long, viewModel: InfoViewModel, navController: NavController) {
+fun InfoScreen(
+    type: String,
+    id: Long,
+    viewModel: InfoViewModel,
+    navController: NavController,
+    username: String? = null
+) {
     Log.d("InfoScreen", type)
     when (type) {
         "user" -> UserInfoScreen(id, viewModel, navController)
         "group" -> GroupInfoScreen(id, viewModel, navController)
         "channel" -> ChannelInfoScreen(id, viewModel, navController)
+        "search" -> {
+            username?.also {
+                val info by remember { viewModel.searchPublicGroup(it) }.collectAsState(initial = null)
+                info?.also {
+                    when (val ty = it.type) {
+                        is TdApi.ChatTypeSupergroup -> {
+                            navController.popBackStack()
+                            navController.navigate(
+                                Screen.Info.buildRoute(
+                                    "channel",
+                                    ty.supergroupId
+                                )
+                            )
+                        }
+                        is TdApi.ChatTypePrivate -> {
+                            navController.popBackStack()
+                            navController.navigate(Screen.Info.buildRoute("user", ty.userId))
+                        }
+                        is TdApi.ChatTypeBasicGroup -> {
+                            navController.popBackStack()
+                            navController.navigate(Screen.Info.buildRoute("group", ty.basicGroupId))
+                        }
+                    }
+                } ?: Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    CircularProgressIndicator()
+                }
+            }
+        }
         else -> {
             navController.popBackStack()
         }

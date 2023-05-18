@@ -3,6 +3,7 @@ package moe.astar.telegramw.ui.util
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.wear.compose.material.*
@@ -12,14 +13,15 @@ fun MenuItem(
     title: String,
     imageVector: ImageVector,
     onClick: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    backgroundColor: Color = MaterialTheme.colors.surface,
 ) {
     Chip(
         modifier = modifier.fillMaxWidth(0.9f),
         onClick = onClick,
         label = { Text(title) },
         icon = { Icon(imageVector = imageVector, contentDescription = title) },
-        colors = ChipDefaults.chipColors(backgroundColor = MaterialTheme.colors.surface)
+        colors = ChipDefaults.chipColors(backgroundColor = backgroundColor)
     )
 
 }

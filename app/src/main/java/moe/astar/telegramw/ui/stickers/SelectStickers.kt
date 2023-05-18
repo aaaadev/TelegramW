@@ -155,9 +155,11 @@ fun StickersView(
                                 val stickerFile by remember { viewModel.fetchFile(sticker.sticker) }.collectAsState(
                                     initial = null
                                 )
-                                Box(modifier = Modifier
-                                    .width(50.dp)
-                                    .height(50.dp)) {
+                                Box(
+                                    modifier = Modifier
+                                        .width(50.dp)
+                                        .height(50.dp)
+                                ) {
                                     stickerFile?.also {
                                         when (sticker.format) {
                                             is TdApi.StickerFormatWebp -> {

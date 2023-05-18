@@ -140,7 +140,7 @@ fun ChatSelectScaffold(
 fun ChatItem(chat: TdApi.Chat, onClick: () -> Unit = {}, viewModel: ChatSelectViewModel) {
     Card(
         onClick = onClick,
-        backgroundPainter = ColorPainter(MaterialTheme.colors.surface),
+        backgroundPainter = ColorPainter(MaterialTheme.colors.background),
     ) {
 
         Row(horizontalArrangement = Arrangement.SpaceBetween) {

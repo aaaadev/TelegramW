@@ -292,7 +292,7 @@ fun MessageMenuScaffold(
 fun ReactionItem(onClick: () -> Unit) {
     MenuItem(
         title = "Reaction",
-        imageVector = Icons.Outlined.EmojiEmotions,
+        imageVector = Icons.Outlined.Favorite,
         onClick = onClick
     )
 }

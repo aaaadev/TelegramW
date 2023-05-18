@@ -151,7 +151,7 @@ fun TopicSelectScaffold(
 fun ChatItem(topic: TdApi.ForumTopic, onClick: () -> Unit = {}, viewModel: TopicSelectViewModel) {
     Card(
         onClick = onClick,
-        backgroundPainter = ColorPainter(MaterialTheme.colors.surface),
+        backgroundPainter = ColorPainter(MaterialTheme.colors.background),
     ) {
         Row(horizontalArrangement = Arrangement.SpaceBetween) {
             val emojis: State<TdApi.Stickers?> =

@@ -63,6 +63,22 @@ class InfoViewModel @Inject constructor(
         }
     }
 
+    fun searchPublicGroup(username: String): Flow<TdApi.Chat> {
+        return client.sendRequest(TdApi.SearchPublicChat(username)).filterIsInstance()
+    }
+
+    fun deleteChat(chatId: Long) {
+        client.sendUnscopedRequest(TdApi.DeleteChat(chatId))
+    }
+
+    fun leaveChat(chatId: Long) {
+        client.sendUnscopedRequest(TdApi.LeaveChat(chatId))
+    }
+
+    fun joinChat(chatId: Long) {
+        client.sendUnscopedRequest(TdApi.JoinChat(chatId))
+    }
+
     fun getPrivateChat(userId: Long): Flow<TdApi.Chat> {
         return client.sendRequest(TdApi.CreatePrivateChat(userId, true)).filterIsInstance()
     }

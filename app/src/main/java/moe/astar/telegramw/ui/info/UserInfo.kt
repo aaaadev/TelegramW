@@ -4,13 +4,19 @@ import android.content.Intent
 import android.net.Uri
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.text.ClickableText
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import androidx.navigation.NavController
@@ -69,7 +75,15 @@ fun UserInfoScaffold(user: TdApi.User, viewModel: InfoViewModel, navController: 
                 item { Username(user) }
                 item { PhoneNumber(user) }
                 if (userInfo != null) {
+                    item {
+                        Spacer(modifier = Modifier.height(5.dp))
+                    }
+
                     item { UserBio(userInfo) }
+
+                    item {
+                        Spacer(modifier = Modifier.height(5.dp))
+                    }
                 }
                 item { SendMessage(user, viewModel, navController) }
 
@@ -102,14 +116,39 @@ fun Name(user: TdApi.User) {
 @Composable
 fun Username(user: TdApi.User) {
     if (user.usernames != null) {
-        Text("@${user.usernames!!.activeUsernames[0]}")
+        val uriHandler = LocalUriHandler.current
+        val url = "t.me/${user.usernames!!.activeUsernames[0]}"
+        val annotatedString = buildAnnotatedString {
+            append("@${user.usernames!!.activeUsernames[0]}")
+            addStyle(
+                style = SpanStyle(
+                    color = Color(0xFF64B5F6),
+                    textDecoration = TextDecoration.Underline
+                ),
+                start = 0,
+                end = this.length,
+            )
+
+            addStringAnnotation(
+                tag = "url",
+                annotation = "https://$url",
+                start = 0,
+                end = this.length,
+            )
+        }
+        ClickableText(text = annotatedString, onClick = {
+            annotatedString.getStringAnnotations("url", it, it).firstOrNull()
+                ?.let { stringAnnotation ->
+                    uriHandler.openUri(stringAnnotation.item)
+                }
+        })
     }
 }
 
 @Composable
 fun UserBio(user: TdApi.UserFullInfo) {
     if (user.bio != null) {
-        Text(user.bio!!.text)
+        Text(user.bio!!.text, style = MaterialTheme.typography.caption2)
     }
 }
 

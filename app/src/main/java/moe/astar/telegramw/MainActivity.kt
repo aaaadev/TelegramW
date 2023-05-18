@@ -15,6 +15,8 @@ import android.os.IBinder
 import android.util.Log
 import androidx.activity.compose.setContent
 import androidx.appcompat.app.AppCompatActivity
+import androidx.navigation.NavHostController
+import androidx.wear.compose.navigation.rememberSwipeDismissableNavController
 import dagger.hilt.android.AndroidEntryPoint
 import moe.astar.telegramw.ui.App
 import org.osmdroid.config.Configuration
@@ -23,6 +25,7 @@ import org.osmdroid.config.Configuration
 class MainActivity : AppCompatActivity() {
     private var notificationService: NotificationService? = null
     private var bound: Boolean = false
+    lateinit var navController: NavHostController
 
     /** Defines callbacks for service binding, passed to bindService()  */
     private val serviceConnection = object : ServiceConnection {
@@ -59,15 +62,36 @@ class MainActivity : AppCompatActivity() {
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        setTheme(R.style.AppTheme)
+        var isFirst = true
         super.onCreate(savedInstanceState)
 
         Configuration.getInstance().userAgentValue = BuildConfig.APPLICATION_ID
 
         setContent {
+            navController = rememberSwipeDismissableNavController()
             App(
+                navController = navController,
                 enableNotification = { this.enableNotification() },
-                disableNotification = { this.disableNotification() })
+                disableNotification = { this.disableNotification() }
+            )
+            if (isFirst) {
+                val action = intent?.action
+                val data = intent?.data
+                when (action) {
+                    "android.intent.action.VIEW" -> {
+                        data?.also {
+                            navController.navigate(
+                                Screen.Info.buildRoute(
+                                    "search",
+                                    0,
+                                    it.path.toString().replace("/", "")
+                                )
+                            )
+                        }
+                    }
+                }
+                isFirst = false
+            }
         }
     }
 }

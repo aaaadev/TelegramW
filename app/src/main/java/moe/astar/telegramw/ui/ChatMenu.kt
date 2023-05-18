@@ -1,9 +1,6 @@
 package moe.astar.telegramw.ui
 
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.Delete
-import androidx.compose.material.icons.outlined.Logout
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -94,30 +91,6 @@ fun ChatMenuScreen(chatId: Long, viewModel: ChatMenuViewModel, navController: Na
             }
             item {
                 Spacer(modifier = Modifier.height(5.dp))
-            }
-
-            item {
-                Text("Chat Options")
-            }
-
-            chat?.also { chatValue ->
-                if (chatValue.canBeDeletedForAllUsers) {
-                    item {
-                        MenuItem(
-                            title = "Delete",
-                            imageVector = Icons.Outlined.Delete,
-                            onClick = { viewModel.deleteChat(chatValue.id) }
-                        )
-                    }
-                }
-
-                item {
-                    MenuItem(
-                        title = "Leave",
-                        imageVector = Icons.Outlined.Logout,
-                        onClick = { viewModel.leaveChat(chatValue.id) }
-                    )
-                }
             }
         }
 

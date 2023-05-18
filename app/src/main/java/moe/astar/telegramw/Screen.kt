@@ -51,14 +51,18 @@ sealed class Screen(val route: String) {
             entry.arguments?.getString("messageId")?.toLong()
     }
 
-    object Info : Screen("info/{type}/{id}") {
-        fun buildRoute(type: String, id: Long): String = "info/$type/$id"
+    object Info : Screen("info/{type}/{id}/{username}") {
+        fun buildRoute(type: String, id: Long, username: String? = null): String =
+            "info/$type/$id/$username"
+
         fun getId(entry: NavBackStackEntry): Long? =
             entry.arguments?.getString("id")?.toLong()
 
         fun getType(entry: NavBackStackEntry): String? =
             entry.arguments?.getString("type")
 
+        fun getUsername(entry: NavBackStackEntry): String? =
+            entry.arguments?.getString("username")
     }
 
     object Video : Screen("video/{path}") {
