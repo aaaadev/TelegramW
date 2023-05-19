@@ -19,15 +19,15 @@
 # If you keep the line number information, uncomment this to
 # hide the original source file name.
 #-renamesourcefileattribute SourceFile
--keep class org.drinkless.tdlib.Client {
-    *;
+-keepclassmembers class org.drinkless.tdlib.Client {
+    public *;
 }
--keep class org.drinkless.tdlib.TdApi {
-    *;
+-keepclassmembers class org.drinkless.tdlib.TdApi {
+    public *;
 }
--keep class org.drinkless.tdlib.About {
-    *;
+-keepclassmembers class org.drinkless.tdlib.About {
+    public *;
 }
--keep class org.drinkless.tdlib.BuildConfig {
-    *;
+-keepclassmembers class org.drinkless.tdlib.BuildConfig {
+    public *;
 }

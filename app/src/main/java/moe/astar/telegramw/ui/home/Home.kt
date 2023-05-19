@@ -4,9 +4,12 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.*
+import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.gestures.animateScrollBy
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.PageSize
+import androidx.compose.foundation.pager.PagerDefaults
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.runtime.*
@@ -84,7 +87,10 @@ fun HomeScaffold(navController: NavController, viewModel: HomeViewModel) {
     ) {
         val maxPages = 2
         var finalValue by remember { mutableStateOf(0) }
-        var state = rememberPagerState(0)
+        var state = rememberPagerState(
+            initialPage = 0,
+            initialPageOffsetFraction = 0f
+        ) { maxPages }
 
         val animatedSelectedPage by animateFloatAsState(
             targetValue = state.currentPage.toFloat(),
@@ -104,31 +110,43 @@ fun HomeScaffold(navController: NavController, viewModel: HomeViewModel) {
         }
         val shape = if (LocalConfiguration.current.isScreenRound) CircleShape else null
         HorizontalPager(
-            pageCount = maxPages,
+            modifier = Modifier,
             state = state,
-        ) { page ->
-            Box(
-                modifier = Modifier.fillMaxSize().run {
-                    if (shape != null) {
-                        clip(shape)
-                    } else {
-                        this
+            pageSpacing = 0.dp,
+            userScrollEnabled = true,
+            reverseLayout = false,
+            contentPadding = PaddingValues(0.dp),
+            beyondBoundsPageCount = 0,
+            pageSize = PageSize.Fill,
+            flingBehavior = PagerDefaults.flingBehavior(state = state),
+            key = null,
+            pageNestedScrollConnection = PagerDefaults.pageNestedScrollConnection(
+                Orientation.Horizontal
+            ),
+            pageContent = { page ->
+                Box(
+                    modifier = Modifier.fillMaxSize().run {
+                        if (shape != null) {
+                            clip(shape)
+                        } else {
+                            this
+                        }
                     }
-                }
-            ) {
-                when (page) {
-                    0 -> {
-                        ChatPage(listState, focusRequester, navController, viewModel)
-                    }
-                    1 -> {
-                        ContactsPage(
-                            navController = navController,
-                            viewModel = viewModel
-                        )
+                ) {
+                    when (page) {
+                        0 -> {
+                            ChatPage(listState, focusRequester, navController, viewModel)
+                        }
+                        1 -> {
+                            ContactsPage(
+                                navController = navController,
+                                viewModel = viewModel
+                            )
+                        }
                     }
                 }
             }
-        }
+        )
         Box(
             modifier = Modifier
                 .fillMaxSize()

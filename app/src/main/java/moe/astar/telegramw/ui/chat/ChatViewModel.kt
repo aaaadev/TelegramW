@@ -1,13 +1,10 @@
 package moe.astar.telegramw.ui.chat
 
 import android.content.Context
-import android.graphics.BitmapFactory
 import android.media.AudioAttributes
 import android.media.MediaPlayer
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.ImageBitmap
-import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.lifecycle.ViewModel
@@ -122,16 +119,14 @@ class ChatViewModel @Inject constructor(
         return client.getFilePath(file)
     }
 
-    fun fetchPhoto(photoMessage: TdApi.MessagePhoto): Flow<ImageBitmap?> {
+    fun fetchPhoto(photo: TdApi.Photo): Flow<String?> {
         // Take the smallest photo size whose width is larger than screen width,
         // or the largest available photo size if it doesn't exist
-        val photoSize = photoMessage.photo.sizes.dropWhile { it.width < screenWidth }.firstOrNull()
-            ?: photoMessage.photo.sizes.last()
+        val photoSize = photo.sizes.dropWhile { it.width < screenWidth }.firstOrNull()
+            ?: photo.sizes.last()
 
         return fetchFile(photoSize.photo).map {
-            it?.let {
-                BitmapFactory.decodeFile(it)?.asImageBitmap()
-            }
+            it
         }
     }
 

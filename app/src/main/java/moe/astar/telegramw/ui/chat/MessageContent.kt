@@ -13,17 +13,20 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.ClickableText
+import androidx.compose.material3.Divider
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.painter.ColorPainter
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle
@@ -31,6 +34,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
 import androidx.core.content.ContextCompat.startActivity
 import androidx.navigation.NavController
@@ -46,10 +50,7 @@ import com.airbnb.lottie.compose.LottieConstants
 import com.airbnb.lottie.compose.rememberLottieComposition
 import moe.astar.telegramw.R
 import moe.astar.telegramw.Screen
-import moe.astar.telegramw.ui.util.MapView
-import moe.astar.telegramw.ui.util.MessageStatusIcon
-import moe.astar.telegramw.ui.util.ShortDescription
-import moe.astar.telegramw.ui.util.VideoView
+import moe.astar.telegramw.ui.util.*
 import okio.buffer
 import okio.source
 import org.drinkless.tdlib.TdApi
@@ -357,6 +358,9 @@ fun MessageCard(
                         }
                     }
                 }
+                message.forwardInfo?.also {
+                    ShortText("Forwarded message")
+                }
                 content()
             }
         }
@@ -402,11 +406,22 @@ fun Time(timestamp: Int) {
 }
 
 @Composable
-fun FormattedText(text: TdApi.FormattedText, modifier: Modifier = Modifier) {
-
+fun FormattedText(
+    text: TdApi.FormattedText,
+    navController: NavController,
+    modifier: Modifier = Modifier,
+    style: TextStyle = MaterialTheme.typography.body2,
+    length: Int? = null
+) {
     val formattedString = buildAnnotatedString {
         pushStyle(SpanStyle(color = MaterialTheme.colors.onSurfaceVariant))
-        append(text.text)
+        length?.also {
+            if (text.text.length > it) {
+                append(text.text.dropLast(text.text.length - it))
+            } else {
+                append(text.text)
+            }
+        } ?: append(text.text)
         for (entity in text.entities) {
             when (val entityType = entity.type) {
                 is TdApi.TextEntityTypeBold -> {
@@ -444,16 +459,47 @@ fun FormattedText(text: TdApi.FormattedText, modifier: Modifier = Modifier) {
                         entity.offset + entity.length
                     )
                 }
+                is TdApi.TextEntityTypeMention -> {
+                    addStyle(
+                        style = SpanStyle(
+                            color = Color(0xff64B5F6), textDecoration = TextDecoration.Underline
+                        ), start = entity.offset, end = entity.offset + entity.length
+                    )
+                    var username = text.text.drop(entity.offset).take(entity.length)
+                    addStringAnnotation(
+                        tag = "mention",
+                        annotation = username,
+                        start = entity.offset,
+                        end = entity.offset + entity.length
+                    )
+                }
+                is TdApi.TextEntityTypeMentionName -> {
+                    addStyle(
+                        style = SpanStyle(
+                            color = Color(0xff64B5F6), textDecoration = TextDecoration.Underline
+                        ), start = entity.offset, end = entity.offset + entity.length
+                    )
+                    addStringAnnotation(
+                        tag = "mentionName",
+                        annotation = entityType.userId.toString(),
+                        start = entity.offset,
+                        end = entity.offset + entity.length
+                    )
+                }
                 is TdApi.TextEntityTypeTextUrl -> {
                     addStyle(
                         style = SpanStyle(
                             color = Color(0xff64B5F6), textDecoration = TextDecoration.Underline
                         ), start = entity.offset, end = entity.offset + entity.length
                     )
+                    var url = Uri.parse(entityType.url)
+                    if (url.scheme.isNullOrEmpty()) {
+                        url = Uri.parse("http://" + entityType.url)
+                    }
 
                     addStringAnnotation(
                         tag = "url",
-                        annotation = entityType.url,
+                        annotation = url.toString(),
                         start = entity.offset,
                         end = entity.offset + entity.length
                     )
@@ -465,9 +511,16 @@ fun FormattedText(text: TdApi.FormattedText, modifier: Modifier = Modifier) {
                         ), start = entity.offset, end = entity.offset + entity.length
                     )
 
+                    var url = Uri.parse(text.text.drop(entity.offset).take(entity.length))
+                    if (url.scheme.isNullOrEmpty()) {
+                        url =
+                            Uri.parse("http://" + text.text.drop(entity.offset).take(entity.length))
+                    }
+
+
                     addStringAnnotation(
                         tag = "url",
-                        annotation = text.text.drop(entity.offset).take(entity.length),
+                        annotation = url.toString(),
                         start = entity.offset,
                         end = entity.offset + entity.length
                     )
@@ -503,10 +556,13 @@ fun FormattedText(text: TdApi.FormattedText, modifier: Modifier = Modifier) {
                 is TdApi.TextEntityTypeCashtag -> {}
                 is TdApi.TextEntityTypeHashtag -> {}
                 is TdApi.TextEntityTypeMediaTimestamp -> {}
-                is TdApi.TextEntityTypeMention -> {}
-                is TdApi.TextEntityTypeMentionName -> {}
                 is TdApi.TextEntityTypePre -> {}
                 is TdApi.TextEntityTypePreCode -> {}
+            }
+        }
+        length?.also {
+            if (it < text.text.length) {
+                append("...")
             }
         }
     }
@@ -541,7 +597,28 @@ fun FormattedText(text: TdApi.FormattedText, modifier: Modifier = Modifier) {
                         startActivity(context, phoneIntent, null)
                     }
                 }
-        }, style = MaterialTheme.typography.body2, modifier = modifier
+
+            formattedString.getStringAnnotations("mention", it, it).firstOrNull()
+                ?.let { stringAnnotation ->
+                    navController.navigate(
+                        Screen.Info.buildRoute(
+                            "search",
+                            0,
+                            stringAnnotation.item
+                        )
+                    )
+                }
+
+            formattedString.getStringAnnotations("mentionName", it, it).firstOrNull()
+                ?.let { stringAnnotation ->
+                    navController.navigate(
+                        Screen.Info.buildRoute(
+                            "user",
+                            stringAnnotation.item.toLong()
+                        )
+                    )
+                }
+        }, style = style, modifier = modifier
     )
 }
 
@@ -567,12 +644,119 @@ fun TextMessage(
         Column(
             horizontalAlignment = Alignment.Start
         ) {
-            FormattedText(content.text)
+            FormattedText(content.text, navController = navController)
+            content.webPage?.also {
+                WebpagePreview(webPage = it, viewModel = viewModel, navController = navController)
+            }
             MessageInfo(message, viewModel)
         }
     }
 }
 
+const val MAX_PREVIEW_DESCRIPTION = 100
+
+@Composable
+fun WebpagePreview(navController: NavController, webPage: TdApi.WebPage, viewModel: ChatViewModel) {
+    Divider(modifier = Modifier
+        .fillMaxWidth()
+        .padding(top = 7.dp, bottom = 7.dp))
+    Column() {
+        Text(
+            text = webPage.siteName,
+            style = MaterialTheme.typography.title3.copy(
+                fontSize = 12.sp,
+                fontWeight = FontWeight.Bold,
+                textAlign = TextAlign.Center
+            )
+        )
+        Text(
+            text = webPage.title,
+            style = MaterialTheme.typography.title3.copy(
+                fontSize = 12.sp,
+                fontWeight = FontWeight.Bold
+            )
+        )
+        if (webPage.description.text.isNotEmpty()) {
+            Spacer(modifier = Modifier.height(5.dp))
+            FormattedText(
+                modifier = Modifier.padding(start = 3.dp),
+                text = webPage.description,
+                style = MaterialTheme.typography.caption3.copy(color = Color(0xFF888888)),
+                length = MAX_PREVIEW_DESCRIPTION,
+                navController = navController,
+            )
+        }
+        webPage.photo?.also { photo ->
+            Spacer(modifier = Modifier.height(5.dp))
+            val image = remember { viewModel.fetchPhoto(photo) }.collectAsState(initial = null)
+            image.value?.also {
+                val painter = rememberAsyncImagePainter(
+                    model = ImageRequest.Builder(LocalContext.current)
+                        .data("file://$it")
+                        .size(Size.ORIGINAL) // Set the target size to load the image at.
+                        .build()
+                )
+                val state = painter.state
+                if (state is AsyncImagePainter.State.Loading || state is AsyncImagePainter.State.Error) {
+                    Box {
+                        photo.minithumbnail?.also {
+                            val painter = rememberAsyncImagePainter(
+                                model = ImageRequest.Builder(LocalContext.current)
+                                    .data(it.data)
+                                    .size(Size.ORIGINAL) // Set the target size to load the image at.
+                                    .build()
+                            )
+                            val state = painter.state
+                            if (state is AsyncImagePainter.State.Loading || state is AsyncImagePainter.State.Error) {
+                            } else {
+                                Image(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .fillMaxHeight(),
+                                    contentScale = ContentScale.FillWidth,
+                                    painter = painter,
+                                    contentDescription = "photo",
+                                )
+                            }
+                        }
+                        CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+                    }
+                } else {
+                    Image(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .fillMaxHeight(),
+                        contentScale = ContentScale.FillWidth,
+                        painter = painter,
+                        contentDescription = "photo",
+                    )
+                }
+            } ?: Box {
+                photo.minithumbnail?.also {
+                    val painter = rememberAsyncImagePainter(
+                        model = ImageRequest.Builder(LocalContext.current)
+                            .data(it.data)
+                            .size(Size.ORIGINAL) // Set the target size to load the image at.
+                            .build()
+                    )
+                    val state = painter.state
+                    if (state is AsyncImagePainter.State.Loading || state is AsyncImagePainter.State.Error) {
+                    } else {
+                        Image(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .fillMaxHeight(),
+                            contentScale = ContentScale.FillWidth,
+                            painter = painter,
+                            contentDescription = "photo",
+                        )
+                    }
+                }
+                CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+            }
+        }
+    }
+}
 
 @Composable
 fun PhotoMessage(
@@ -593,7 +777,7 @@ fun PhotoMessage(
             Bitmap.createScaledBitmap(bmp, 400, (400 / aspectRatio).toInt(), true).asImageBitmap()
         }
     }
-    val image = remember { viewModel.fetchPhoto(content) }.collectAsState(initial = null)
+    val image = remember { viewModel.fetchPhoto(content.photo) }.collectAsState(initial = null)
 
     MessageCard(
         message,
@@ -605,21 +789,40 @@ fun PhotoMessage(
         showSender = showSender,
     ) {
         Column(modifier = Modifier.fillMaxSize(), verticalArrangement = Arrangement.Top) {
-
-            image.value?.also { Image(bitmap = it, contentDescription = null) }
-                ?: run {
+            image.value?.also {
+                val painter = rememberAsyncImagePainter(
+                    model = ImageRequest.Builder(LocalContext.current)
+                        .data("file://$it")
+                        .size(Size.ORIGINAL) // Set the target size to load the image at.
+                        .build()
+                )
+                val state = painter.state
+                if (state is AsyncImagePainter.State.Loading || state is AsyncImagePainter.State.Error) {
                     Box {
                         thumbnail?.also { tn ->
                             Image(bitmap = tn, contentDescription = null)
                         }
                         CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
-
+                    }
+                } else {
+                    Box {
+                        Image(
+                            painter = painter,
+                            contentDescription = "photo",
+                        )
                     }
                 }
-
+            } ?: Box {
+                thumbnail?.also { tn ->
+                    Image(bitmap = tn, contentDescription = null)
+                }
+                CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+            }
             content.caption.text.takeIf { it.isNotEmpty() }?.let {
                 FormattedText(
-                    text = content.caption, modifier = modifier.padding(CardDefaults.ContentPadding)
+                    text = content.caption,
+                    modifier = modifier.padding(CardDefaults.ContentPadding),
+                    navController = navController,
                 )
             }
         }

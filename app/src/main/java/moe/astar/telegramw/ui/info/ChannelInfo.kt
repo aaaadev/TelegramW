@@ -199,14 +199,14 @@ fun ChannelInfoScaffold(
                         Spacer(modifier = Modifier.height(5.dp))
                     }
 
-                    group.usernames?.activeUsernames?.also {
-                        if (it.isNotEmpty()) {
+                    group.usernames?.activeUsernames?.also { arr ->
+                        if (arr.isNotEmpty()) {
                             item {
                                 Text("Link")
                             }
 
-                            items(it) {
-                                val url = "t.me/$it"
+                            items(arr) { item ->
+                                val url = "t.me/$item"
                                 val annotatedString = buildAnnotatedString {
                                     append(url)
                                     addStyle(
@@ -215,14 +215,14 @@ fun ChannelInfoScaffold(
                                             textDecoration = TextDecoration.Underline
                                         ),
                                         start = 0,
-                                        end = url.length
+                                        end = this.length
                                     )
 
                                     addStringAnnotation(
                                         tag = "url",
                                         annotation = "https://$url",
                                         start = 0,
-                                        end = url.length
+                                        end = this.length
                                     )
                                 }
                                 ClickableText(text = annotatedString, onClick = {

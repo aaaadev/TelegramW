@@ -1,8 +1,5 @@
 package moe.astar.telegramw.ui.message
 
-import android.graphics.BitmapFactory
-import androidx.compose.ui.graphics.ImageBitmap
-import androidx.compose.ui.graphics.asImageBitmap
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -47,11 +44,7 @@ class MessageMenuViewModel @Inject constructor(
         }
     }
 
-    fun fetchPhoto(photo: TdApi.File): Flow<ImageBitmap?> {
-        return client.getFilePath(photo).map {
-            it?.let {
-                BitmapFactory.decodeFile(it)?.asImageBitmap()
-            }
-        }
+    fun fetchPhoto(photo: TdApi.File): Flow<String?> {
+        return client.getFilePath(photo).map { it }
     }
 }
