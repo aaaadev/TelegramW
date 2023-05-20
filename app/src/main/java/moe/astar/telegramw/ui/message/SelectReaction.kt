@@ -119,11 +119,10 @@ fun SelectReactionScreen(
                     Text("Select emojis")
                 }
                 if (topReactions.isNotEmpty()) {
-                    for (i in 0..topReactions.size / REACTIONS_PER_ROW) {
+                    for (i in 0..(topReactions.size-1) / REACTIONS_PER_ROW) {
                         item {
                             Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-                                if (i == (topReactions.size / REACTIONS_PER_ROW)) {
-                                    for (j in 0..((topReactions.size - 1) % REACTIONS_PER_ROW)) {
+                                    for (j in 0..if (i != (topReactions.size / REACTIONS_PER_ROW)) { REACTIONS_PER_ROW-1 } else { ((topReactions.size - 1) % REACTIONS_PER_ROW) }) {
                                         when (val reactionType =
                                             topReactions[i * REACTIONS_PER_ROW + j].type) {
                                             is TdApi.ReactionTypeEmoji -> {
@@ -176,61 +175,6 @@ fun SelectReactionScreen(
                                             }
                                         }
                                     }
-                                } else {
-                                    for (j in 0 until REACTIONS_PER_ROW) {
-                                        when (val reactionType =
-                                            topReactions[i * REACTIONS_PER_ROW + j].type) {
-                                            is TdApi.ReactionTypeEmoji -> {
-                                                val emoji =
-                                                    viewModel.getAnimatedEmoji(reactionType.emoji)
-                                                        .collectAsState(
-                                                            initial = null
-                                                        )
-                                                emoji.value?.also { emojiValue ->
-                                                    emojiValue.sticker?.also {
-                                                        EmojiImage(
-                                                            photo = it.thumbnail!!.file,
-                                                            viewModel = viewModel,
-                                                            onClick = {
-                                                                viewModel.addMessageReaction(
-                                                                    chatId,
-                                                                    messageId,
-                                                                    reactionType
-                                                                )
-                                                                navController.popBackStack()
-                                                            }
-                                                        )
-                                                    }
-                                                }
-                                            }
-                                            is TdApi.ReactionTypeCustomEmoji -> {
-                                                val emoji =
-                                                    viewModel.getCustomEmoji(listOf(reactionType.customEmojiId))
-                                                        .collectAsState(
-                                                            initial = null
-                                                        )
-                                                emoji.value?.also { emojiValue ->
-                                                    emojiValue.stickers?.also { stickers ->
-                                                        stickers[0]?.also {
-                                                            EmojiImage(
-                                                                photo = it.thumbnail!!.file,
-                                                                viewModel = viewModel,
-                                                                onClick = {
-                                                                    viewModel.addMessageReaction(
-                                                                        chatId,
-                                                                        messageId,
-                                                                        reactionType
-                                                                    )
-                                                                    navController.popBackStack()
-                                                                }
-                                                            )
-                                                        }
-                                                    }
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
                             }
                         }
                     }

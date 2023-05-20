@@ -42,10 +42,10 @@ fun SelectStickersScreen(
     messageId: Long,
     viewModel: SelectStickersViewModel
 ) {
-    val stickers by remember { viewModel.getInstalledStickerSets(TdApi.StickerTypeRegular()) }.collectAsState(
+    val stickers = viewModel.getInstalledStickerSets(TdApi.StickerTypeRegular()).collectAsState(
         initial = null
     )
-    stickers?.also { stickerSets ->
+    stickers.value?.also { stickerSets ->
         Scaffold(
             vignette = { Vignette(vignettePosition = VignettePosition.TopAndBottom) },
         ) {
@@ -115,8 +115,8 @@ fun StickersView(
     viewModel: SelectStickersViewModel,
     navController: NavController
 ) {
-    val stickers by remember { viewModel.getStickerSet(setId) }.collectAsState(initial = null)
-    stickers?.also {
+    val stickers = viewModel.getStickerSet(setId).collectAsState(initial = null)
+    stickers.value?.also {
         ScalingLazyColumn(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(4.dp),
