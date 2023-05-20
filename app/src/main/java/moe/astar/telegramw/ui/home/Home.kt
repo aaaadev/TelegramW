@@ -87,10 +87,7 @@ fun HomeScaffold(navController: NavController, viewModel: HomeViewModel) {
     ) {
         val maxPages = 2
         var finalValue by remember { mutableStateOf(0) }
-        var state = rememberPagerState(
-            initialPage = 0,
-            initialPageOffsetFraction = 0f
-        ) { maxPages }
+        var state = rememberPagerState(0)
 
         val animatedSelectedPage by animateFloatAsState(
             targetValue = state.currentPage.toFloat(),
@@ -110,43 +107,31 @@ fun HomeScaffold(navController: NavController, viewModel: HomeViewModel) {
         }
         val shape = if (LocalConfiguration.current.isScreenRound) CircleShape else null
         HorizontalPager(
-            modifier = Modifier,
+            pageCount = maxPages,
             state = state,
-            pageSpacing = 0.dp,
-            userScrollEnabled = true,
-            reverseLayout = false,
-            contentPadding = PaddingValues(0.dp),
-            beyondBoundsPageCount = 0,
-            pageSize = PageSize.Fill,
-            flingBehavior = PagerDefaults.flingBehavior(state = state),
-            key = null,
-            pageNestedScrollConnection = PagerDefaults.pageNestedScrollConnection(
-                Orientation.Horizontal
-            ),
-            pageContent = { page ->
-                Box(
-                    modifier = Modifier.fillMaxSize().run {
-                        if (shape != null) {
-                            clip(shape)
-                        } else {
-                            this
-                        }
+        ) { page ->
+            Box(
+                modifier = Modifier.fillMaxSize().run {
+                    if (shape != null) {
+                        clip(shape)
+                    } else {
+                        this
                     }
-                ) {
-                    when (page) {
-                        0 -> {
-                            ChatPage(listState, focusRequester, navController, viewModel)
-                        }
-                        1 -> {
-                            ContactsPage(
-                                navController = navController,
-                                viewModel = viewModel
-                            )
-                        }
+                }
+            ) {
+                when (page) {
+                    0 -> {
+                        ChatPage(listState, focusRequester, navController, viewModel)
+                    }
+                    1 -> {
+                        ContactsPage(
+                            navController = navController,
+                            viewModel = viewModel
+                        )
                     }
                 }
             }
-        )
+        }
         Box(
             modifier = Modifier
                 .fillMaxSize()

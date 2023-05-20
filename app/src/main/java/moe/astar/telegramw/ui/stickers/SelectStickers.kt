@@ -51,12 +51,7 @@ fun SelectStickersScreen(
         ) {
             val maxPages = stickerSets.totalCount
             var finalValue by remember { mutableStateOf(0) }
-            var state = rememberPagerState(
-                initialPage = 0,
-                initialPageOffsetFraction = 0f
-            ) {
-                maxPages
-            }
+            var state = rememberPagerState(0)
 
             val animatedSelectedPage by animateFloatAsState(
                 targetValue = state.currentPage.toFloat(),
@@ -76,39 +71,27 @@ fun SelectStickersScreen(
             }
             val shape = if (LocalConfiguration.current.isScreenRound) CircleShape else null
             HorizontalPager(
-                modifier = Modifier,
+                pageCount = maxPages,
                 state = state,
-                pageSpacing = 0.dp,
-                userScrollEnabled = true,
-                reverseLayout = false,
-                contentPadding = PaddingValues(0.dp),
-                beyondBoundsPageCount = 0,
-                pageSize = PageSize.Fill,
-                flingBehavior = PagerDefaults.flingBehavior(state = state),
-                key = null,
-                pageNestedScrollConnection = PagerDefaults.pageNestedScrollConnection(
-                    Orientation.Horizontal
-                ),
-                pageContent = {
-                    Box(
-                        modifier = Modifier.fillMaxSize().run {
-                            if (shape != null) {
-                                clip(shape)
-                            } else {
-                                this
-                            }
+            ) { page ->
+                Box(
+                    modifier = Modifier.fillMaxSize().run {
+                        if (shape != null) {
+                            clip(shape)
+                        } else {
+                            this
                         }
-                    ) {
-                        StickersView(
-                            chatId,
-                            messageId,
-                            stickerSets.sets[it].id,
-                            viewModel,
-                            navController
-                        )
                     }
+                ) {
+                    StickersView(
+                        chatId,
+                        messageId,
+                        stickerSets.sets[page].id,
+                        viewModel,
+                        navController
+                    )
                 }
-            )
+            }
             Box(
                 modifier = Modifier
                     .fillMaxSize()
