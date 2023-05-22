@@ -319,7 +319,7 @@ fun ChatPage(
                         )
                     },
                     colors = ButtonDefaults.buttonColors(
-                        backgroundColor = MaterialTheme.colors.primary,
+                        backgroundColor = MaterialTheme.colors.primaryVariant,
                         contentColor = MaterialTheme.colors.onSurface
                     )
                 ) {
@@ -331,7 +331,7 @@ fun ChatPage(
                 Button(
                     onClick = { navController.navigate(Screen.Settings.buildRoute()) },
                     colors = ButtonDefaults.buttonColors(
-                        backgroundColor = MaterialTheme.colors.primary,
+                        backgroundColor = MaterialTheme.colors.primaryVariant,
                         contentColor = MaterialTheme.colors.onSurface
                     )
                 ) {

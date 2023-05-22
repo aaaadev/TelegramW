@@ -312,7 +312,7 @@ fun MessageInput(
                 RemoteInputIntentHelper.putRemoteInputsExtra(intent, remoteInputs)
                 launcher.launch(intent)
             }, colors = ButtonDefaults.buttonColors(
-                backgroundColor = MaterialTheme.colors.primary,
+                backgroundColor = MaterialTheme.colors.primaryVariant,
                 contentColor = MaterialTheme.colors.onSurface
             )
         ) {
@@ -325,7 +325,7 @@ fun MessageInput(
         Button(
             onClick = { navController.navigate(Screen.ChatMenu.buildRoute(chatId)) },
             colors = ButtonDefaults.buttonColors(
-                backgroundColor = MaterialTheme.colors.primary,
+                backgroundColor = MaterialTheme.colors.primaryVariant,
                 contentColor = MaterialTheme.colors.onSurface
             )
         ) {
