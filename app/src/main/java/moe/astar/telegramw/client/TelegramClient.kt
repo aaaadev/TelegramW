@@ -3,17 +3,12 @@ package moe.astar.telegramw.client
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.awaitClose
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import org.drinkless.tdlib.Client
 import org.drinkless.tdlib.TdApi
-import java.lang.Thread.sleep
 import java.util.concurrent.ConcurrentHashMap
 import javax.inject.Inject
-import kotlin.random.Random
-import kotlin.random.nextUInt
-import kotlin.random.nextULong
 
 
 class TelegramClient @Inject constructor(private val parameters: TdApi.SetTdlibParameters) {

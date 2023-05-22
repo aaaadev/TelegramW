@@ -93,21 +93,13 @@ fun ChatScaffold(
         }
     }
 
-    if (listState.centerItemIndex > 0 && messageIds.size > listState.centerItemIndex - 1 && !viewModel.readState.contains(
-            messageIds[listState.centerItemIndex - 1]
-        )
-    ) {
-        viewModel.markAsRead(chatId, messageIds[listState.centerItemIndex - 1])
-        viewModel.readState.add(messageIds[listState.centerItemIndex - 1])
-    }
-
     Scaffold(
         timeText = {
             TimeText()
         },
         positionIndicator = {
             PositionIndicator(
-                scalingLazyListState = listState, modifier = Modifier
+                scalingLazyListState = listState, modifier = Modifier, reverseDirection = true
             )
         },
         vignette = { Vignette(vignettePosition = VignettePosition.TopAndBottom) },
@@ -320,7 +312,7 @@ fun MessageInput(
                 RemoteInputIntentHelper.putRemoteInputsExtra(intent, remoteInputs)
                 launcher.launch(intent)
             }, colors = ButtonDefaults.buttonColors(
-                backgroundColor = MaterialTheme.colors.primaryVariant,
+                backgroundColor = MaterialTheme.colors.primary,
                 contentColor = MaterialTheme.colors.onSurface
             )
         ) {
@@ -333,7 +325,7 @@ fun MessageInput(
         Button(
             onClick = { navController.navigate(Screen.ChatMenu.buildRoute(chatId)) },
             colors = ButtonDefaults.buttonColors(
-                backgroundColor = MaterialTheme.colors.primaryVariant,
+                backgroundColor = MaterialTheme.colors.primary,
                 contentColor = MaterialTheme.colors.onSurface
             )
         ) {

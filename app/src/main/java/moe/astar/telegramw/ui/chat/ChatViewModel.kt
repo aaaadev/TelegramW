@@ -95,24 +95,18 @@ class ChatViewModel @Inject constructor(
     }
 
     fun updateVisibleItems(visibleItems: List<ScalingLazyListItemInfo>) {
+        //Log.d(TAG, visibleItems.toString())
         messageProvider.updateSeenItems(
-            visibleItems.map { it.key }.filterIsInstance<Long>()
+            visibleItems.map {
+                if (it.key is Pair<*, *>) {
+                    (it.key as Pair<*, *>).first as Long
+                } else {
+                    null
+                }
+            }.filterIsInstance<Long>()
         )
 
         startVisible = visibleItems.map { it.index }.contains(0)
-    }
-
-    fun markAsRead(chatId: Long, messageId: Long) {
-        viewModelScope.launch {
-            client.sendUnscopedRequest(
-                TdApi.ViewMessages(
-                    chatId,
-                    longArrayOf(messageId),
-                    null,
-                    true
-                )
-            )
-        }
     }
 
     fun fetchFile(file: TdApi.File): Flow<String?> {
@@ -130,6 +124,25 @@ class ChatViewModel @Inject constructor(
         }
     }
 
+    fun fetchPhotoFile(photo: TdApi.File): Flow<String?> {
+        return client.getFilePath(photo).map { it }
+    }
+
+    fun getAnimatedEmoji(emoji: String): Flow<TdApi.AnimatedEmoji> {
+        return client.sendRequest(TdApi.GetAnimatedEmoji(emoji)).filterIsInstance()
+    }
+
+    fun getCustomEmoji(customEmojiId: List<Long>): Flow<TdApi.Stickers> {
+        return client.sendRequest(TdApi.GetCustomEmojiStickers(customEmojiId.toLongArray()))
+            .filterIsInstance()
+    }
+
+    fun removeMessageReaction(chatId: Long, messageId: Long, reactionType: TdApi.ReactionType) {
+        viewModelScope.launch {
+            client.sendUnscopedRequest(TdApi.RemoveMessageReaction(chatId, messageId, reactionType))
+        }
+    }
+
     fun fetchAudio(content: TdApi.File): Flow<MediaPlayer?> {
         return fetchFile(content).map {
             it?.let {
@@ -144,6 +157,20 @@ class ChatViewModel @Inject constructor(
                     prepare()
                 }
             }
+        }
+    }
+
+    fun addMessageReaction(chatId: Long, messageId: Long, reactionType: TdApi.ReactionType) {
+        viewModelScope.launch {
+            client.sendUnscopedRequest(
+                TdApi.AddMessageReaction(
+                    chatId,
+                    messageId,
+                    reactionType,
+                    false,
+                    true
+                )
+            )
         }
     }
 

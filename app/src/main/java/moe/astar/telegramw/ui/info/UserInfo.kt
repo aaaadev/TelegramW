@@ -15,6 +15,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
@@ -153,7 +154,7 @@ fun UserBio(user: TdApi.UserFullInfo) {
 }
 
 @Composable
-fun UserStatus(user: TdApi.User) {
+fun UserStatus(user: TdApi.User, style: TextStyle? = null) {
     // TODO: get user status updates here
     val locale = LocalContext.current.resources.configuration.locales[0]
     val text = when (val status = user.status) {
@@ -161,19 +162,22 @@ fun UserStatus(user: TdApi.User) {
             if (status.expires * 1000L > Calendar.getInstance().time.time) {
                 "Online"
             } else {
-                "last seen ${timeDescription(status.expires, locale)}"
+                "Last seen ${timeDescription(status.expires, locale)}"
             }
-
         }
-        is TdApi.UserStatusOffline -> "last seen ${timeDescription(status.wasOnline, locale)}"
-        is TdApi.UserStatusRecently -> "last seen recently"
-        is TdApi.UserStatusLastWeek -> "last seen within a week"
-        is TdApi.UserStatusLastMonth -> "last seen within a month"
-        else -> ""
+        is TdApi.UserStatusOffline -> "Last seen ${timeDescription(status.wasOnline, locale)}"
+        is TdApi.UserStatusRecently -> "Last seen recently"
+        is TdApi.UserStatusLastWeek -> "Last seen within a week"
+        is TdApi.UserStatusLastMonth -> "Last seen within a month"
+        else -> "Unknown"
     }
 
-    if (text != "") {
-        Text(text)
+    if (text != "Unknown") {
+        if (style != null) {
+            Text(text, maxLines = 1, style = style)
+        } else {
+            Text(text, maxLines = 1)
+        }
     }
 }
 

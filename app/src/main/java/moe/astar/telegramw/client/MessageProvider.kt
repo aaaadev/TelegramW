@@ -93,6 +93,19 @@ class MessageProvider @Inject constructor(
                     }
                 }
             }.launchIn(scope)
+
+        client.updateFlow
+            .filterIsInstance<TdApi.UpdateMessageInteractionInfo>()
+            .filter { it.chatId == chatId }
+            .onEach {
+                _messageData.value[it.messageId]?.also { msg ->
+                    if (_messageData.value.contains(it.messageId)) {
+                        msg.interactionInfo = it.interactionInfo
+                        _messageData.value = _messageData.value.remove(it.messageId)
+                        _messageData.value = _messageData.value.put(it.messageId, msg)
+                    }
+                }
+            }.launchIn(scope)
     }
 
     fun pullMessages(limit: Int = 10) {
@@ -166,6 +179,7 @@ class MessageProvider @Inject constructor(
     }
 
     fun updateSeenItems(items: List<Long>) {
+        Log.d(TAG, items.toString())
         client.sendUnscopedRequest(
             TdApi.ViewMessages(
                 chatId,

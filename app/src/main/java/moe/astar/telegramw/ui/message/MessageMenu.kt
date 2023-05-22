@@ -7,7 +7,6 @@ import android.view.inputmethod.EditorInfo
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.*
@@ -212,7 +211,7 @@ fun MessageMenuScaffold(
                         navController.navigate(Screen.SelectStickers.buildRoute(message.id, chatId))
                     }
                 }
-                message.interactionInfo?.also { interactionInfo ->
+                /*message.interactionInfo?.also { interactionInfo ->
                     item {
                         Text("Reactions")
                     }
@@ -282,7 +281,7 @@ fun MessageMenuScaffold(
                             }
                         }
                     }
-                }
+                }*/
             }
         }
     }

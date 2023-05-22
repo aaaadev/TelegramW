@@ -10,13 +10,17 @@ import android.os.CountDownTimer
 import android.util.Log
 import android.view.MotionEvent
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.ClickableText
 import androidx.compose.material3.Divider
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.painter.ColorPainter
@@ -33,6 +37,7 @@ import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
@@ -368,19 +373,135 @@ fun MessageCard(
 }
 
 @Composable
+fun EmojiImage(
+    photo: TdApi.File,
+    viewModel: ChatViewModel,
+    imageSize: Dp = 30.dp,
+) {
+    Box(
+        modifier = Modifier
+            .clip(CircleShape)
+    ) {
+        viewModel.fetchPhotoFile(photo).collectAsState(null).value?.also {
+            val painter = rememberAsyncImagePainter(
+                model = ImageRequest.Builder(LocalContext.current)
+                    .data("file://$it")
+                    .size(Size.ORIGINAL) // Set the target size to load the image at.
+                    .build()
+            )
+            val state = painter.state
+            if (state is AsyncImagePainter.State.Loading || state is AsyncImagePainter.State.Error) {
+                CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+            } else {
+                Image(
+                    modifier = Modifier
+                        .clip(CircleShape)
+                        .align(Alignment.Center)
+                        .size(imageSize),
+                    painter = painter,
+                    contentDescription = null,
+                )
+            }
+        } ?: run {
+            CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+        }
+    }
+}
+
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
 fun MessageInfo(message: TdApi.Message, viewModel: ChatViewModel) {
     val chat = viewModel.chatFlow.collectAsState()
-
-    Row(
-        verticalAlignment = Alignment.Bottom,
-        horizontalArrangement = Arrangement.End,
-        modifier = Modifier.fillMaxWidth()
-    ) {
+    FlowRow(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Start) {
+        message.interactionInfo?.also { interactionInfo ->
+            val reactions = interactionInfo.reactions
+            reactions.forEach { reaction ->
+                Box(
+                    modifier = Modifier
+                        .background(
+                            if (!reaction.isChosen) {
+                                Color(0x44000000)
+                            } else {
+                                Color(0x44CCCCCC)
+                            },
+                            RoundedCornerShape(10.dp)
+                        )
+                        .padding(3.dp)
+                        .clip(RoundedCornerShape(10.dp))
+                        .clickable {
+                            if (reaction.isChosen) {
+                                viewModel.removeMessageReaction(
+                                    message.chatId,
+                                    message.id,
+                                    reaction.type,
+                                )
+                            } else {
+                                viewModel.addMessageReaction(
+                                    message.chatId,
+                                    message.id,
+                                    reaction.type,
+                                )
+                            }
+                        }
+                ) {
+                    Row(horizontalArrangement = Arrangement.SpaceBetween) {
+                        when (val reactionType =
+                            reaction.type) {
+                            is TdApi.ReactionTypeEmoji -> {
+                                val emoji =
+                                    viewModel.getAnimatedEmoji(reactionType.emoji)
+                                        .collectAsState(
+                                            initial = null
+                                        )
+                                emoji.value?.also { emojiValue ->
+                                    emojiValue.sticker?.also {
+                                        EmojiImage(
+                                            photo = it.thumbnail!!.file,
+                                            viewModel = viewModel,
+                                            imageSize = 17.dp,
+                                        )
+                                        if (reaction.totalCount > 1) {
+                                            Text(
+                                                reaction.totalCount.toString(),
+                                            )
+                                        }
+                                    }
+                                }
+                            }
+                            is TdApi.ReactionTypeCustomEmoji -> {
+                                val emoji =
+                                    viewModel.getCustomEmoji(listOf(reactionType.customEmojiId))
+                                        .collectAsState(
+                                            initial = null
+                                        )
+                                emoji.value?.also { emojiValue ->
+                                    emojiValue.stickers?.also { stickers ->
+                                        stickers[0]?.also {
+                                            EmojiImage(
+                                                photo = it.thumbnail!!.file,
+                                                viewModel = viewModel,
+                                                imageSize = 17.dp,
+                                            )
+                                            if (reaction.totalCount > 1) {
+                                                Text(
+                                                    reaction.totalCount.toString(),
+                                                )
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
         if (message.editDate > message.date)
             Text(
                 "edited",
                 style = MaterialTheme.typography.caption1,
-                modifier = Modifier.padding(end = 2.dp)
             )
         Time(message.date)
         if (message.isOutgoing) {
@@ -389,10 +510,8 @@ fun MessageInfo(message: TdApi.Message, viewModel: ChatViewModel) {
                 chat.value,
                 modifier = Modifier
                     .size(20.dp)
-                    .padding(start = 2.dp)
             )
         }
-
     }
 }
 
@@ -657,9 +776,11 @@ const val MAX_PREVIEW_DESCRIPTION = 100
 
 @Composable
 fun WebpagePreview(navController: NavController, webPage: TdApi.WebPage, viewModel: ChatViewModel) {
-    Divider(modifier = Modifier
-        .fillMaxWidth()
-        .padding(top = 7.dp, bottom = 7.dp))
+    Divider(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(top = 7.dp, bottom = 7.dp)
+    )
     Column() {
         Text(
             text = webPage.siteName,

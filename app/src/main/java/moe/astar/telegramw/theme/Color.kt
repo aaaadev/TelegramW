@@ -3,20 +3,20 @@ package moe.astar.telegramw.theme
 import androidx.compose.ui.graphics.Color
 import androidx.wear.compose.material.Colors
 
-val Purple200 = Color(0xFFFFFFFF)
-val primaryBlue = Color(0xFF8888EE)
-val Purple500 = Color(0xFF6200EE)
-val Purple700 = Color(0xFF1F2968)
-val Teal200 = Color(0xFF03DAC5)
-val Red400 = Color(0xFFCF6679)
+val telegramBlue = Color(0xFF0088CC)
+val telegramLightBlue = Color(0xFF3F8FBB)
+val telegramDarkBlue = Color(0xFF084B6E)
+val telegramGreen = Color(0xFF00AF9C)
+val telegramRed = Color(0xFFD70A00)
+val telegramBlack = Color(0xFF000000)
 
 internal val wearColorPalette: Colors = Colors(
-    primary = primaryBlue,
-    primaryVariant = Purple700,
-    secondary = Teal200,
-    secondaryVariant = Teal200,
-    error = Red400,
-    onPrimary = Color.Black,
-    onSecondary = Color.Black,
-    onError = Color.Black
+    primary = telegramBlue,
+    primaryVariant = telegramDarkBlue,
+    secondary = telegramGreen,
+    secondaryVariant = telegramGreen,
+    error = telegramRed,
+    onPrimary = telegramBlack,
+    onSecondary = telegramBlack,
+    onError = telegramBlack,
 )

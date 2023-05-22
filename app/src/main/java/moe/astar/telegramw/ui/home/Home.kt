@@ -4,14 +4,13 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.*
-import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.gestures.animateScrollBy
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.pager.HorizontalPager
-import androidx.compose.foundation.pager.PageSize
-import androidx.compose.foundation.pager.PagerDefaults
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.People
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
@@ -26,14 +25,14 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.wear.compose.material.*
 import kotlinx.coroutines.launch
 import moe.astar.telegramw.R
 import moe.astar.telegramw.Screen
-import moe.astar.telegramw.ui.info.PlaceholderInfoImage
+import moe.astar.telegramw.ui.info.UserStatus
 import moe.astar.telegramw.ui.util.MessageStatusIcon
 import moe.astar.telegramw.ui.util.ShortDescription
 import org.drinkless.tdlib.TdApi
@@ -44,23 +43,28 @@ import java.util.*
 
 @Composable
 fun HomeScreen(navController: NavController, viewModel: HomeViewModel) {
-
     val homeState by viewModel.homeState
 
     when (homeState) {
         HomeState.Loading -> {
             Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                CircularProgressIndicator()
+                Box(
+                    contentAlignment = Alignment.Center,
+                    modifier = Modifier.fillMaxSize()
+                ) {
+                    Image(
+                        painter = painterResource(id = R.mipmap.ic_launcher_foreground),
+                        contentDescription = null
+                    )
+                }
             }
         }
         HomeState.Login -> {
-            LocalContext.current.applicationContext.setTheme(R.style.AppTheme)
             navController.navigate(Screen.Login.route) {
                 launchSingleTop = true
             }
         }
         HomeState.Ready -> {
-            LocalContext.current.applicationContext.setTheme(R.style.AppTheme)
             HomeScaffold(navController, viewModel)
         }
     }
@@ -87,7 +91,7 @@ fun HomeScaffold(navController: NavController, viewModel: HomeViewModel) {
     ) {
         val maxPages = 2
         var finalValue by remember { mutableStateOf(0) }
-        var state = rememberPagerState(0)
+        val state = rememberPagerState(0)
 
         val animatedSelectedPage by animateFloatAsState(
             targetValue = state.currentPage.toFloat(),
@@ -107,6 +111,7 @@ fun HomeScaffold(navController: NavController, viewModel: HomeViewModel) {
         }
         val shape = if (LocalConfiguration.current.isScreenRound) CircleShape else null
         HorizontalPager(
+            modifier = Modifier.focusRequester(focusRequester),
             pageCount = maxPages,
             state = state,
         ) { page ->
@@ -189,11 +194,11 @@ fun ContactsPage(
 
 @Composable
 fun UserItem(userId: Long, viewModel: HomeViewModel, navController: NavController) {
-    val imageSize = 30.dp
     viewModel.getUser(userId)?.also { user ->
         Box(
             modifier = Modifier
                 .fillMaxWidth()
+                .height(35.dp)
                 .clickable {
                     navController.navigate(Screen.Info.buildRoute("user", user.id))
                 }
@@ -201,19 +206,25 @@ fun UserItem(userId: Long, viewModel: HomeViewModel, navController: NavControlle
             Row(
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Spacer(modifier = Modifier.width(20.dp))
                 user.profilePhoto?.also {
-                    InfoImage(it.small, it.minithumbnail, viewModel, imageSize = imageSize)
+                    InfoImage(it.small, it.minithumbnail, viewModel)
                 } ?: run {
-                    PlaceholderInfoImage(
-                        painterResource(R.drawable.baseline_person_24),
-                        imageSize = imageSize
+                    Icon(
+                        modifier = Modifier.fillMaxHeight(),
+                        imageVector = Icons.Outlined.People,
+                        contentDescription = null
                     )
                 }
                 Spacer(modifier = Modifier.width(10.dp))
 
-                Text(user.let { it.firstName + " " + it.lastName })
-
+                Column() {
+                    Text(
+                        user.let { it.firstName + " " + it.lastName },
+                        maxLines = 1,
+                        style = MaterialTheme.typography.title3.copy(fontSize = 12.sp)
+                    )
+                    UserStatus(user, style = MaterialTheme.typography.caption3)
+                }
             }
 
         }
@@ -227,7 +238,6 @@ fun InfoImage(
     photo: TdApi.File,
     thumbnail: TdApi.Minithumbnail?,
     viewModel: HomeViewModel,
-    imageSize: Dp = 120.dp
 ) {
 
     val thumbnailBitmap = remember {
@@ -247,7 +257,7 @@ fun InfoImage(
         val imageModifier = Modifier
             .clip(CircleShape)
             .align(Alignment.Center)
-            .size(imageSize)
+            .fillMaxHeight()
 
         viewModel.fetchPhoto(photo).collectAsState(null).value?.also {
             Image(it, null, modifier = imageModifier)
@@ -309,7 +319,7 @@ fun ChatPage(
                         )
                     },
                     colors = ButtonDefaults.buttonColors(
-                        backgroundColor = MaterialTheme.colors.primaryVariant,
+                        backgroundColor = MaterialTheme.colors.primary,
                         contentColor = MaterialTheme.colors.onSurface
                     )
                 ) {
@@ -321,7 +331,7 @@ fun ChatPage(
                 Button(
                     onClick = { navController.navigate(Screen.Settings.buildRoute()) },
                     colors = ButtonDefaults.buttonColors(
-                        backgroundColor = MaterialTheme.colors.primaryVariant,
+                        backgroundColor = MaterialTheme.colors.primary,
                         contentColor = MaterialTheme.colors.onSurface
                     )
                 ) {
