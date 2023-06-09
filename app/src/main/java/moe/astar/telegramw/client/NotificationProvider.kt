@@ -224,7 +224,7 @@ class NotificationProvider @Inject constructor(
                     context,
                     0,
                     markAsReadIntent,
-                    PendingIntent.FLAG_UPDATE_CURRENT
+                    0
                 )
             )
             .build()
@@ -237,7 +237,7 @@ class NotificationProvider @Inject constructor(
                     context,
                     0,
                     replyIntent,
-                    PendingIntent.FLAG_UPDATE_CURRENT
+                    0
                 )
             )
             .addRemoteInput(RemoteInput.Builder("reply").run { setLabel("Reply") }.build())
@@ -259,7 +259,7 @@ class NotificationProvider @Inject constructor(
             .addAction(markAsReadAction)
             .addAction(replyAction)
             //.setContentIntent(PendingIntent.getActivity(context, 0, mainIntent, PendingIntent.FLAG_IMMUTABLE))
-            //.setAutoCancel(true)
+            .setAutoCancel(true)
             .setGroup(GROUP_ID)
             .build()
 

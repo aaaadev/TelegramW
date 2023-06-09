@@ -184,8 +184,8 @@ class MessageProvider @Inject constructor(
             TdApi.ViewMessages(
                 chatId,
                 items.toLongArray(),
-                TdApi.MessageSourceChatList(),
-                false
+                TdApi.MessageSourceChatHistory(),
+                true
             )
         )
     }

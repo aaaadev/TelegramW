@@ -49,22 +49,14 @@ class NotificationService : Service() {
             val chatId = intent.getLongExtra("chatId", 0)
             val msgIds = intent.getLongArrayExtra("msgIds")
             Log.d(TAG, "trying to read ${msgIds?.size} messages from $chatId")
-            runBlocking {
-                val result = CompletableDeferred<TdApi.Ok>()
-                runBlocking {
-                    client.sendRequest(
+                    client.sendUnscopedRequest(
                         TdApi.ViewMessages(
                             chatId,
                             msgIds,
-                            null,
+                            TdApi.MessageSourceNotification(),
                             true
                         )
-                    ).filterIsInstance<TdApi.Ok>().collect {
-                        result.complete(it)
-                    }
-                }
-                result.await()
-            }
+                    )
         }
     }
 
@@ -74,12 +66,9 @@ class NotificationService : Service() {
             val chatId = intent.getLongExtra("chatId", 0)
             val threadId = intent.getLongExtra("threadId", 0)
             val messageId = intent.getLongExtra("messageId", 0)
-            val reply = RemoteInput.getResultsFromIntent(intent).getString("reply")
+            val reply = RemoteInput.getResultsFromIntent(intent).getCharSequence("reply")
             Log.d("NotificationService", "Send reply $reply to $messageId ($threadId) $chatId")
-            runBlocking {
-                val result = CompletableDeferred<TdApi.Message>()
-                runBlocking {
-                    client.sendRequest(
+            client.sendUnscopedRequest(
                         TdApi.SendMessage(
                             chatId,
                             threadId,
@@ -88,18 +77,14 @@ class NotificationService : Service() {
                             null,
                             TdApi.InputMessageText(
                                 TdApi.FormattedText(
-                                    reply, emptyArray()
+                                    reply.toString(), emptyArray()
                                 ),
                                 false,
                                 false,
                             )
                         )
-                    ).filterIsInstance<TdApi.Message>().collect {
-                        result.complete(it)
-                    }
-                }
-                result.await()
-            }
+                    )
+
         }
     }
 
