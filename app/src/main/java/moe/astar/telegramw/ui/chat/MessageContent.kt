@@ -14,6 +14,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.ClickableText
 import androidx.compose.material3.Divider
@@ -55,6 +56,7 @@ import com.airbnb.lottie.compose.LottieConstants
 import com.airbnb.lottie.compose.rememberLottieComposition
 import moe.astar.telegramw.R
 import moe.astar.telegramw.Screen
+import moe.astar.telegramw.ui.info.PlaceholderInfoImage
 import moe.astar.telegramw.ui.util.*
 import okio.buffer
 import okio.source
@@ -298,6 +300,44 @@ fun MessageContent(
 }
 
 @Composable
+fun ProfileImage(
+    photo: TdApi.File,
+    thumbnail: TdApi.Minithumbnail?,
+    viewModel: ChatViewModel,
+    imageSize: Dp = 20.dp
+) {
+
+    val thumbnailBitmap = remember {
+        thumbnail?.let {
+            val data = thumbnail.data
+            val aspectRatio = thumbnail.width.toFloat() / thumbnail.height.toFloat()
+            val bmp = BitmapFactory.decodeByteArray(data, 0, data.size)
+            Bitmap.createScaledBitmap(bmp, 400, (400 / aspectRatio).toInt(), true).asImageBitmap()
+        }
+    }
+
+    Box(
+        modifier = Modifier
+            .clip(CircleShape)
+    ) {
+
+        val imageModifier = Modifier
+            .clip(CircleShape)
+            .align(Alignment.Center)
+            .size(imageSize)
+
+        viewModel.fetchPhoto(photo).collectAsState(null).value?.also {
+            Image(it, null, modifier = imageModifier)
+        } ?: run {
+            thumbnailBitmap?.also {
+                Image(it, null, modifier = imageModifier)
+                //CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+            }
+        }
+    }
+}
+
+@Composable
 fun MessageCard(
     message: TdApi.Message,
     navController: NavController,
@@ -310,15 +350,55 @@ fun MessageCard(
     content: @Composable (ColumnScope.() -> Unit),
 ) {
     showSender?.also { sender ->
-        Box(modifier = Modifier.fillMaxWidth()) {
-            Sender(
-                sender,
-                viewModel,
-                navController,
-                modifier = Modifier
-                    .align(Alignment.CenterStart)
-                    .clickable {}
-            )
+        Box(modifier = Modifier
+            .fillMaxWidth()
+            .padding(bottom = 4.dp, top = 4.dp)) {
+            Row(horizontalArrangement = Arrangement.SpaceBetween) {
+                Box(modifier = Modifier
+                    .padding(end = 7.dp)
+                    .clickable {
+                        navController.navigate(Screen.Info.buildRoute("user", sender))
+                    }) {
+                    when (val sender = message.senderId) {
+                        is TdApi.MessageSenderUser -> {
+                            viewModel.getUser(sender.userId)?.also { user ->
+                                user.profilePhoto?.also {
+                                    ProfileImage(it.small, it.minithumbnail, viewModel)
+                                } ?: PlaceholderInfoImage(
+                                    painterResource(R.drawable.baseline_person_24),
+                                    20.dp
+                                )
+                            } ?: PlaceholderInfoImage(
+                                painterResource(R.drawable.baseline_person_24),
+                                20.dp
+                            )
+                        }
+                        is TdApi.MessageSenderChat -> {
+                            val chat =
+                                viewModel.getChat(sender.chatId).collectAsState(initial = null)
+                            chat.value?.also { chat ->
+                                chat.photo?.also {
+                                    ProfileImage(it.small, it.minithumbnail, viewModel)
+                                } ?: PlaceholderInfoImage(
+                                    painterResource(R.drawable.baseline_person_24),
+                                    20.dp
+                                )
+                            } ?: PlaceholderInfoImage(
+                                painterResource(R.drawable.baseline_person_24),
+                                20.dp
+                            )
+                        }
+                    }
+                }
+                Sender(
+                    sender,
+                    viewModel,
+                    navController,
+                    modifier = Modifier
+                        .align(Alignment.CenterVertically)
+                        .clickable {}
+                )
+            }
         }
     }
     Box(
@@ -339,6 +419,11 @@ fun MessageCard(
                 backgroundPainter = ColorPainter(
                     if (message.isOutgoing) MaterialTheme.colors.primaryVariant else MaterialTheme.colors.surface
                 ),
+                shape = if (showSender == null) {
+                    MaterialTheme.shapes.large
+                } else {
+                    MaterialTheme.shapes.large.copy(topStart = CornerSize(0.dp))
+                }
             ) {
                 if (message.replyToMessageId != 0L) {
                     val messages by viewModel.messageProvider.messageData.collectAsState()
@@ -482,11 +567,9 @@ fun MessageInfo(message: TdApi.Message, viewModel: ChatViewModel) {
                                                 viewModel = viewModel,
                                                 imageSize = 17.dp,
                                             )
-                                            if (reaction.totalCount > 1) {
-                                                Text(
-                                                    reaction.totalCount.toString(),
-                                                )
-                                            }
+                                            Text(
+                                                reaction.totalCount.toString(),
+                                            )
                                         }
                                     }
                                 }
@@ -781,7 +864,7 @@ fun WebpagePreview(navController: NavController, webPage: TdApi.WebPage, viewMod
             .fillMaxWidth()
             .padding(top = 7.dp, bottom = 7.dp)
     )
-    Column() {
+    Column {
         Text(
             text = webPage.siteName,
             style = MaterialTheme.typography.title3.copy(

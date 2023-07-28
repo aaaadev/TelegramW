@@ -1,25 +1,36 @@
 package moe.astar.telegramw.ui.home
 
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.focusable
 import androidx.compose.foundation.gestures.animateScrollBy
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.painter.ColorPainter
 import androidx.compose.ui.input.rotary.onRotaryScrollEvent
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.wear.compose.material.*
 import androidx.wear.compose.material.dialog.Confirmation
 import androidx.wear.compose.material.dialog.Dialog
 import kotlinx.coroutines.launch
+import moe.astar.telegramw.R
 import moe.astar.telegramw.Screen
+import moe.astar.telegramw.ui.info.PlaceholderInfoImage
 import moe.astar.telegramw.ui.util.MessageStatusIcon
 import moe.astar.telegramw.ui.util.ShortDescription
 import org.drinkless.tdlib.TdApi
@@ -137,6 +148,44 @@ fun ChatSelectScaffold(
 }
 
 @Composable
+fun ChatImage(
+    photo: TdApi.File,
+    thumbnail: TdApi.Minithumbnail?,
+    viewModel: ChatSelectViewModel,
+    imageSize: Dp = 20.dp
+) {
+
+    val thumbnailBitmap = remember {
+        thumbnail?.let {
+            val data = thumbnail.data
+            val aspectRatio = thumbnail.width.toFloat() / thumbnail.height.toFloat()
+            val bmp = BitmapFactory.decodeByteArray(data, 0, data.size)
+            Bitmap.createScaledBitmap(bmp, 400, (400 / aspectRatio).toInt(), true).asImageBitmap()
+        }
+    }
+
+    Box(
+        modifier = Modifier
+            .clip(CircleShape)
+    ) {
+
+        val imageModifier = Modifier
+            .clip(CircleShape)
+            .align(Alignment.Center)
+            .size(imageSize)
+
+        viewModel.fetchPhoto(photo).collectAsState(null).value?.also {
+            Image(it, null, modifier = imageModifier)
+        } ?: run {
+            thumbnailBitmap?.also {
+                Image(it, null, modifier = imageModifier)
+                //CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+            }
+        }
+    }
+}
+
+@Composable
 fun ChatItem(chat: TdApi.Chat, onClick: () -> Unit = {}, viewModel: ChatSelectViewModel) {
     Card(
         onClick = onClick,
@@ -144,6 +193,11 @@ fun ChatItem(chat: TdApi.Chat, onClick: () -> Unit = {}, viewModel: ChatSelectVi
     ) {
 
         Row(horizontalArrangement = Arrangement.SpaceBetween) {
+            Box(modifier = Modifier.padding(end = 7.dp)) {
+                chat.photo?.also {
+                    ChatImage(it.small, it.minithumbnail, viewModel)
+                } ?: PlaceholderInfoImage(painterResource(R.drawable.baseline_person_24), 20.dp)
+            }
             // Chat name
             Text(
                 text = chat.title,

@@ -1,8 +1,13 @@
 package moe.astar.telegramw.ui.home
 
+import android.graphics.BitmapFactory
+import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import moe.astar.telegramw.client.Authenticator
 import moe.astar.telegramw.client.ChatProvider
@@ -36,6 +41,14 @@ class ChatSelectViewModel @Inject constructor(
                     false
                 )
             )
+        }
+    }
+
+    fun fetchPhoto(photo: TdApi.File): Flow<ImageBitmap?> {
+        return client.getFilePath(photo).map {
+            it?.let {
+                BitmapFactory.decodeFile(it)?.asImageBitmap()
+            }
         }
     }
 }

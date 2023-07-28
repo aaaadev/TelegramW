@@ -1,10 +1,13 @@
 package moe.astar.telegramw.ui.chat
 
 import android.content.Context
+import android.graphics.BitmapFactory
 import android.media.AudioAttributes
 import android.media.MediaPlayer
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.lifecycle.ViewModel
@@ -86,6 +89,10 @@ class ChatViewModel @Inject constructor(
     fun getBasicGroupInfo(id: Long): TdApi.BasicGroupFullInfo? = client.getBasicGroupInfo(id)
     fun getSupergroupInfo(id: Long): TdApi.SupergroupFullInfo? = client.getSupergroupInfo(id)
 
+    fun getChat(chatId: Long): Flow<TdApi.Chat> {
+        return client.sendRequest(TdApi.GetChat(chatId)).filterIsInstance()
+    }
+
     fun onStart(chatId: Long) {
         client.sendUnscopedRequest(TdApi.OpenChat(chatId))
     }
@@ -111,6 +118,14 @@ class ChatViewModel @Inject constructor(
 
     fun fetchFile(file: TdApi.File): Flow<String?> {
         return client.getFilePath(file)
+    }
+
+    fun fetchPhoto(photo: TdApi.File): Flow<ImageBitmap?> {
+        return client.getFilePath(photo).map {
+            it?.let {
+                BitmapFactory.decodeFile(it)?.asImageBitmap()
+            }
+        }
     }
 
     fun fetchPhoto(photo: TdApi.Photo): Flow<String?> {

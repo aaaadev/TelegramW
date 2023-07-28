@@ -25,6 +25,7 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
@@ -32,6 +33,7 @@ import androidx.wear.compose.material.*
 import kotlinx.coroutines.launch
 import moe.astar.telegramw.R
 import moe.astar.telegramw.Screen
+import moe.astar.telegramw.ui.info.PlaceholderInfoImage
 import moe.astar.telegramw.ui.info.UserStatus
 import moe.astar.telegramw.ui.util.MessageStatusIcon
 import moe.astar.telegramw.ui.util.ShortDescription
@@ -217,7 +219,7 @@ fun UserItem(userId: Long, viewModel: HomeViewModel, navController: NavControlle
                 }
                 Spacer(modifier = Modifier.width(10.dp))
 
-                Column() {
+                Column {
                     Text(
                         user.let { it.firstName + " " + it.lastName },
                         maxLines = 1,
@@ -298,13 +300,6 @@ fun ChatPage(
             .wrapContentHeight(),
     ) {
         item {
-            Text(
-                "Chats",
-                style = MaterialTheme.typography.title2,
-                modifier = Modifier.padding(bottom = 8.dp)
-            )
-        }
-        item {
             Row(
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
                 modifier = Modifier.padding(bottom = 10.dp)
@@ -342,6 +337,13 @@ fun ChatPage(
                 }
             }
         }
+        item {
+            Text(
+                "Chats",
+                style = MaterialTheme.typography.title2,
+                modifier = Modifier.padding(bottom = 8.dp)
+            )
+        }
         items(chats) { chatId ->
             chatData[chatId]?.let { chat ->
                 ChatItem(
@@ -366,6 +368,44 @@ fun ChatPage(
 }
 
 @Composable
+fun ChatImage(
+    photo: TdApi.File,
+    thumbnail: TdApi.Minithumbnail?,
+    viewModel: HomeViewModel,
+    imageSize: Dp = 20.dp
+) {
+
+    val thumbnailBitmap = remember {
+        thumbnail?.let {
+            val data = thumbnail.data
+            val aspectRatio = thumbnail.width.toFloat() / thumbnail.height.toFloat()
+            val bmp = BitmapFactory.decodeByteArray(data, 0, data.size)
+            Bitmap.createScaledBitmap(bmp, 400, (400 / aspectRatio).toInt(), true).asImageBitmap()
+        }
+    }
+
+    Box(
+        modifier = Modifier
+            .clip(CircleShape)
+    ) {
+
+        val imageModifier = Modifier
+            .clip(CircleShape)
+            .align(Alignment.Center)
+            .size(imageSize)
+
+        viewModel.fetchPhoto(photo).collectAsState(null).value?.also {
+            Image(it, null, modifier = imageModifier)
+        } ?: run {
+            thumbnailBitmap?.also {
+                Image(it, null, modifier = imageModifier)
+                //CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+            }
+        }
+    }
+}
+
+@Composable
 fun ChatItem(chat: Chat, onClick: () -> Unit = {}, viewModel: HomeViewModel) {
     Card(
         onClick = onClick,
@@ -373,6 +413,11 @@ fun ChatItem(chat: Chat, onClick: () -> Unit = {}, viewModel: HomeViewModel) {
     ) {
 
         Row(horizontalArrangement = Arrangement.SpaceBetween) {
+            Box(modifier = Modifier.padding(end = 7.dp)) {
+                chat.photo?.also {
+                    ChatImage(it.small, it.minithumbnail, viewModel)
+                } ?: PlaceholderInfoImage(painterResource(R.drawable.baseline_person_24), 20.dp)
+            }
             // Chat name
             Text(
                 text = chat.title,

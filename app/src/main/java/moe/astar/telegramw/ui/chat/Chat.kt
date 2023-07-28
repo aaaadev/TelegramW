@@ -219,7 +219,6 @@ fun Sender(
     viewModel.getUser(sender)?.also { user ->
         Box(
             modifier = modifier
-                .padding(start = 10.dp, top = 4.dp, bottom = 4.dp)
         ) {
             Text(
                 user.let { it.firstName + " " + it.lastName },

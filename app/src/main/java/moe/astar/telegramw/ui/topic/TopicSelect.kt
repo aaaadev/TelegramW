@@ -164,8 +164,10 @@ fun ChatItem(topic: TdApi.ForumTopic, onClick: () -> Unit = {}, viewModel: Topic
                         stickers[0]?.also { emoji ->
                             viewModel.fetchPhoto(emoji.thumbnail!!.file)
                                 .collectAsState(null).value?.also { img ->
-                                    Image(img, null, Modifier.size(20.dp))
-                                    Spacer(modifier = Modifier.width(7.dp))
+                                    Image(img, null,
+                                        Modifier
+                                            .size(20.dp)
+                                            .padding(end = 7.dp))
                                 }
                         }
                     }
