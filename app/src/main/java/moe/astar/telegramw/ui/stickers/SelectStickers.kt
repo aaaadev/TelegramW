@@ -50,7 +50,7 @@ fun SelectStickersScreen(
         ) {
             val maxPages = stickerSets.totalCount
             var finalValue by remember { mutableStateOf(0) }
-            var state = rememberPagerState(0)
+            var state = rememberPagerState(0, pageCount = { maxPages })
 
             val animatedSelectedPage by animateFloatAsState(
                 targetValue = state.currentPage.toFloat(),
@@ -70,7 +70,6 @@ fun SelectStickersScreen(
             }
             val shape = if (LocalConfiguration.current.isScreenRound) CircleShape else null
             HorizontalPager(
-                pageCount = maxPages,
                 state = state,
             ) { page ->
                 Box(

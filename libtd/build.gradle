@@ -8,11 +8,11 @@ apply plugin: 'com.android.library'
 
 android {
     namespace 'org.drinkless.tdlib'
-    compileSdkVersion 33
+    compileSdkVersion 34
 
     sourceSets.main {
         jniLibs.srcDir 'src/main/libs'
-        jni.srcDirs = [] //disable automatic ndk-build call
+        //disable automatic ndk-build call
     }
 
     defaultConfig {
@@ -25,8 +25,7 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
-    lintOptions {
-        // use this line to check all rules except those listed
+    lint {
         disable 'InvalidPackage'
     }
 }

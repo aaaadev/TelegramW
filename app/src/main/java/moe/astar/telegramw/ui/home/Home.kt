@@ -92,8 +92,8 @@ fun HomeScaffold(navController: NavController, viewModel: HomeViewModel) {
         vignette = { Vignette(vignettePosition = VignettePosition.TopAndBottom) }
     ) {
         val maxPages = 2
-        var finalValue by remember { mutableStateOf(0) }
-        val state = rememberPagerState(0)
+        var finalValue by remember { mutableIntStateOf(0) }
+        val state = rememberPagerState(0, pageCount = { maxPages })
 
         val animatedSelectedPage by animateFloatAsState(
             targetValue = state.currentPage.toFloat(),
@@ -114,7 +114,6 @@ fun HomeScaffold(navController: NavController, viewModel: HomeViewModel) {
         val shape = if (LocalConfiguration.current.isScreenRound) CircleShape else null
         HorizontalPager(
             modifier = Modifier.focusRequester(focusRequester),
-            pageCount = maxPages,
             state = state,
         ) { page ->
             Box(

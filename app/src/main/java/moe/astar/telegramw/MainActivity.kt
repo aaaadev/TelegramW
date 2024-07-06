@@ -15,6 +15,7 @@ import android.os.IBinder
 import android.util.Log
 import androidx.activity.compose.setContent
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.navigation.NavHostController
 import androidx.wear.compose.navigation.rememberSwipeDismissableNavController
 import dagger.hilt.android.AndroidEntryPoint
@@ -62,6 +63,8 @@ class MainActivity : AppCompatActivity() {
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        installSplashScreen()
+
         var isFirst = true
         super.onCreate(savedInstanceState)
 
